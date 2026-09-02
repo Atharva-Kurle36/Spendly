@@ -10,7 +10,7 @@ import { LLMProvider } from './ai/llm-provider';
 const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
 
 app.use('/*', cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: (origin) => origin,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
@@ -20,10 +20,10 @@ app.use('/*', cors({
 
 // Root Health Check Route
 app.get('/', (c) => {
-  return c.json({ 
-    status: 'online', 
-    service: 'SmartWallet AI Backend', 
-    version: '1.0.0' 
+  return c.json({
+    status: 'online',
+    service: 'SmartWallet AI Backend',
+    version: '1.0.0'
   });
 });
 
@@ -36,7 +36,7 @@ app.get('/api/health', (c) => {
 app.post('/api/users/sync', authMiddleware, async (c) => {
   const user = c.get('user');
   const userRepo = new UserRepository(c.env.DB);
-  
+
   try {
     const dbUser = await userRepo.createOrUpdate({
       id: user.id,
@@ -64,7 +64,7 @@ expenses.post('/', async (c) => {
   const user = c.get('user');
   const repo = new ExpenseRepository(c.env.DB);
   const body = await c.req.json();
-  
+
   // Basic validation omitted for brevity
   const expense = await repo.create({
     id: body.id || crypto.randomUUID(),
@@ -90,15 +90,15 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
   const user = c.get('user');
   try {
     const { text, filename, income } = await c.req.json();
-    
+
     if (!text) {
       return c.json({ success: false, error: { message: 'No text extracted from document' } }, 400);
     }
-    
+
     // 1. Save raw text to R2 for audit/storage
     const objectKey = `statements/${user.id}/${Date.now()}-${filename}.txt`;
     await c.env.RECEIPTS_BUCKET.put(objectKey, text);
-    
+
     // 2. Parse using AI LLM
     const llm = new LLMProvider(c.env.OPENROUTER_API_KEY);
     const parsedPayload = await llm.parseStatementText(text);
@@ -106,14 +106,14 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
     const parsedBills = parsedPayload.bills || [];
     const parsedBudgets = parsedPayload.budgets || [];
     const parsedInsight = parsedPayload.insight || null;
-    
+
     // 3. Insert into Database
     const transactions = [];
     const expenseRepo = new ExpenseRepository(c.env.DB);
-    
+
     for (const row of parsedRows) {
       if (!row.amount || !row.merchant) continue;
-      
+
       let category_id = null;
       if (row.category_name) {
         if (row.category_name.includes('Food')) category_id = 'cat_food';
@@ -125,17 +125,17 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
       const expense = await expenseRepo.create({
         id: crypto.randomUUID(),
         user_id: user.id,
-        category_id: category_id, 
+        category_id: category_id,
         amount: Math.round(row.amount * 100), // convert to paise
         merchant: row.merchant,
         date: new Date(row.date).toISOString() || new Date().toISOString(),
         payment_method: 'imported_statement',
         note: `Imported via AI from ${filename}`
       });
-      
+
       transactions.push(expense);
     }
-    
+
     // 3.1 Insert Auto-Pilot Bills
     for (const bill of parsedBills) {
       if (!bill.merchant || !bill.amount) continue;
@@ -150,13 +150,13 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
       if (budget.category_name.includes('Food')) cat_id = 'cat_food';
       else if (budget.category_name.includes('Shopping')) cat_id = 'cat_shopping';
       else if (budget.category_name.includes('Transport')) cat_id = 'cat_transport';
-      
+
       const budgetId = crypto.randomUUID();
       await c.env.DB.prepare('INSERT INTO budgets (id, user_id, category_id, amount, period) VALUES (?, ?, ?, ?, ?)')
         .bind(budgetId, user.id, cat_id, Math.round(budget.limit_amount * 100), 'monthly').run();
-        
+
       await c.env.DB.prepare('INSERT INTO budget_periods (id, budget_id, start_date, end_date, spent_amount) VALUES (?, ?, ?, ?, ?)')
-        .bind(crypto.randomUUID(), budgetId, new Date().toISOString(), new Date(new Date().setMonth(new Date().getMonth()+1)).toISOString(), 0).run();
+        .bind(crypto.randomUUID(), budgetId, new Date().toISOString(), new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(), 0).run();
     }
 
     // 3.3 Insert AI Insight
@@ -171,13 +171,13 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
         .bind(Math.round(Number(income) * 100), 'checking', user.id).run();
     }
 
-    return c.json({ 
-      success: true, 
-      data: { 
+    return c.json({
+      success: true,
+      data: {
         message: `Successfully analyzed and imported ${transactions.length} transactions via AI.`,
         transactions,
         storage_key: objectKey
-      } 
+      }
     });
   } catch (err: any) {
     return c.json({ success: false, error: { message: err.message } }, 500);
@@ -190,11 +190,11 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
 
 app.get('/api/overview', authMiddleware, async (c) => {
   const user = c.get('user');
-  
+
   // Dynamic Live Data
   const { results: accounts } = await c.env.DB.prepare('SELECT * FROM accounts WHERE user_id = ?').bind(user.id).all();
   const totalBalance = accounts.reduce((sum: number, acc: any) => sum + acc.balance, 0);
-  
+
   // Calculate true total spent
   const { results: allExpenses } = await c.env.DB.prepare('SELECT SUM(amount) as total FROM expenses WHERE user_id = ?').bind(user.id).all();
   const totalSpent = (allExpenses[0]?.total as number) || 0;
@@ -234,7 +234,7 @@ app.get('/api/overview', authMiddleware, async (c) => {
   // If no balance, fallback to 50. If totalSpent is higher than totalBalance, score goes down.
   let healthScore = 100;
   let healthStatus = "Excellent Health";
-  
+
   if (totalBalance > 0) {
     const spendingRatio = totalSpent / totalBalance;
     if (spendingRatio > 0.8) {
@@ -289,7 +289,7 @@ app.get('/api/transactions', authMiddleware, async (c) => {
 app.post('/api/transactions', authMiddleware, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
-  
+
   const expenseId = crypto.randomUUID();
   await c.env.DB.prepare('INSERT INTO expenses (id, user_id, category_id, amount, merchant, date, payment_method, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
     .bind(expenseId, user.id, body.category_id, Math.round(body.amount * 100), body.merchant, new Date().toISOString(), body.payment_method || 'UPI', body.note || '').run();
@@ -330,22 +330,22 @@ app.get('/api/budgets', authMiddleware, async (c) => {
 app.post('/api/budgets', authMiddleware, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
-  
+
   // Check if budget for this category already exists
   const { results: existing } = await c.env.DB.prepare('SELECT id FROM budgets WHERE user_id = ? AND category_id = ?')
     .bind(user.id, body.category_id).all();
-    
+
   if (existing.length > 0) {
     return c.json({ success: false, error: 'A budget for this category already exists. Please edit the existing budget.' }, 400);
   }
 
   const budgetId = crypto.randomUUID();
-  
+
   await c.env.DB.prepare('INSERT INTO budgets (id, user_id, category_id, amount, period) VALUES (?, ?, ?, ?, ?)')
     .bind(budgetId, user.id, body.category_id, Math.round(body.amount * 100), 'monthly').run();
-    
+
   await c.env.DB.prepare('INSERT INTO budget_periods (id, budget_id, start_date, end_date, spent_amount) VALUES (?, ?, ?, ?, ?)')
-    .bind(crypto.randomUUID(), budgetId, new Date().toISOString(), new Date(new Date().setMonth(new Date().getMonth()+1)).toISOString(), 0).run();
+    .bind(crypto.randomUUID(), budgetId, new Date().toISOString(), new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(), 0).run();
 
   return c.json({ success: true, message: 'Budget created successfully' });
 });
@@ -355,7 +355,7 @@ app.put('/api/budgets/:id', authMiddleware, async (c) => {
     const user = c.get('user');
     const budgetId = c.req.param('id');
     const body = await c.req.json();
-    
+
     await c.env.DB.prepare('UPDATE budgets SET amount = ? WHERE id = ? AND user_id = ?')
       .bind(Math.round(body.amount * 100), budgetId, user.id).run();
 
@@ -369,7 +369,7 @@ app.delete('/api/budgets/:id', authMiddleware, async (c) => {
   try {
     const user = c.get('user');
     const budgetId = c.req.param('id');
-    
+
     // Need to delete budget_periods as well due to foreign key (or rely on cascade, but safer to delete)
     await c.env.DB.prepare('DELETE FROM budget_periods WHERE budget_id = ?').bind(budgetId).run();
     await c.env.DB.prepare('DELETE FROM budgets WHERE id = ? AND user_id = ?').bind(budgetId, user.id).run();
@@ -389,7 +389,7 @@ app.get('/api/bills', authMiddleware, async (c) => {
 app.post('/api/bills', authMiddleware, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
-  
+
   await c.env.DB.prepare('INSERT INTO bills (id, user_id, merchant, amount, due_date, status, is_recurring, recurrence_interval) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
     .bind(crypto.randomUUID(), user.id, body.merchant, Math.round(body.amount * 100), body.due_date, 'pending', body.is_recurring ? 1 : 0, 'monthly').run();
 
@@ -405,7 +405,7 @@ app.get('/api/goals', authMiddleware, async (c) => {
 app.post('/api/goals', authMiddleware, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
-  
+
   await c.env.DB.prepare('INSERT INTO savings_goals (id, user_id, name, target_amount, current_amount, monthly_contribution, target_date) VALUES (?, ?, ?, ?, ?, ?, ?)')
     .bind(crypto.randomUUID(), user.id, body.name, Math.round(body.target_amount * 100), 0, Math.round(body.monthly_contribution * 100), body.target_date).run();
 
@@ -416,7 +416,7 @@ app.post('/api/goals/:id/add-funds', authMiddleware, async (c) => {
   const user = c.get('user');
   const id = c.req.param('id');
   const body = await c.req.json();
-  
+
   await c.env.DB.prepare('UPDATE savings_goals SET current_amount = current_amount + ? WHERE id = ? AND user_id = ?')
     .bind(Math.round(body.amount * 100), id, user.id).run();
 
@@ -431,7 +431,7 @@ app.get('/api/insights', authMiddleware, async (c) => {
 
 app.post('/api/insights/generate', authMiddleware, async (c) => {
   const user = c.get('user');
-  
+
   try {
     const { results: expenses } = await c.env.DB.prepare('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 20').bind(user.id).all();
     const { results: budgets } = await c.env.DB.prepare(`
@@ -447,20 +447,20 @@ app.post('/api/insights/generate', authMiddleware, async (c) => {
 
     await c.env.DB.prepare('INSERT INTO ai_insights (id, user_id, type, severity, title, description, evidence, recommendation, action_type, is_dismissed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(
-        crypto.randomUUID(), 
-        user.id, 
-        insight.type || 'anomaly', 
-        insight.severity || 'medium', 
-        insight.title || 'New Insight', 
-        insight.description || 'Generated insight.', 
-        insight.evidence || '', 
-        insight.recommendation || '', 
-        insight.action_type || 'Review', 
+        crypto.randomUUID(),
+        user.id,
+        insight.type || 'anomaly',
+        insight.severity || 'medium',
+        insight.title || 'New Insight',
+        insight.description || 'Generated insight.',
+        insight.evidence || '',
+        insight.recommendation || '',
+        insight.action_type || 'Review',
         0
       ).run();
 
     return c.json({ success: true, message: 'Insight generated successfully' });
-  } catch(err: any) {
+  } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
   }
 });
@@ -473,7 +473,7 @@ app.get('/api/debug/dump', async (c) => {
   const { results: budgets } = await c.env.DB.prepare('SELECT * FROM budgets').all();
   const { results: bills } = await c.env.DB.prepare('SELECT * FROM bills').all();
   const { results: goals } = await c.env.DB.prepare('SELECT * FROM savings_goals').all();
-  
+
   const renderTable = (name: string, rows: any[]) => {
     if (!rows || rows.length === 0) return html`<h3>${name} (Empty)</h3>`;
     const cols = Object.keys(rows[0]);
