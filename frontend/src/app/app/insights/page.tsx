@@ -9,6 +9,7 @@ import { api } from '@/lib/api-client';
 export default function InsightsPage() {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [insights, setInsights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +38,9 @@ export default function InsightsPage() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Failed");
       await fetchInsights();
+      
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 4000);
     } catch (err) {
       console.error(err);
       alert('Failed to generate insights. Ensure OpenRouter is configured and you have transactions.');
@@ -76,6 +80,13 @@ export default function InsightsPage() {
           {isGenerating ? 'Analyzing...' : 'Generate New Insight'}
         </button>
       </header>
+
+      {showSuccess && (
+        <div className="bg-deepmint/10 border border-deepmint/20 text-deepmint px-6 py-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500 shadow-sm">
+          <Sparkles className="w-5 h-5" />
+          <span className="font-medium text-lg">Your personalized report is successfully generated!</span>
+        </div>
+      )}
 
       {loading || isGenerating ? (
         <div className="bg-gradient-to-br from-mint/20 via-deepmint/10 to-transparent p-1 rounded-3xl animate-pulse">
