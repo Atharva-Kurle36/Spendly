@@ -50,7 +50,10 @@ ${JSON.stringify(budgets, null, 2)}
     }
 
     const data: any = await response.json();
-    const content = data.choices[0].message.content;
+    let content = data.choices[0].message.content;
+    
+    // Clean up potential markdown formatting that some models ignore instructions to omit
+    content = content.replace(/```json/g, "").replace(/```/g, "").trim();
     
     try {
       return JSON.parse(content);

@@ -83,26 +83,7 @@ app.route('/api/expenses', expenses);
 
 // Budgets Routes removed here in favor of app.get('/api/budgets') below
 
-// AI Insights Route
-app.post('/api/insights/generate', authMiddleware, async (c) => {
-  const user = c.get('user');
-  const expenseRepo = new ExpenseRepository(c.env.DB);
-  const budgetRepo = new BudgetRepository(c.env.DB);
-  
-  const [expensesList, budgetsList] = await Promise.all([
-    expenseRepo.findAllByUserId(user.id),
-    budgetRepo.findAllByUserId(user.id)
-  ]);
-  
-  const llm = new LLMProvider(c.env.OPENROUTER_API_KEY);
-  
-  try {
-    const insight = await llm.generateInsight(expensesList.slice(0, 50), budgetsList);
-    return c.json({ success: true, data: insight });
-  } catch (err: any) {
-    return c.json({ success: false, error: { message: err.message } }, 500);
-  }
-});
+// Duplicate insights route removed
 
 // Bank Statement Import Route (AI Powered PDF/Text parsing)
 app.post('/api/transactions/import', authMiddleware, async (c) => {
