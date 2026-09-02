@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingDown, Target, BrainCircuit, AlertTriangle, ArrowRight, Zap, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { API_CONFIG } from '@/config';
 import { api } from '@/lib/api-client';
 
 export default function InsightsPage() {
+  const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
   const [insights, setInsights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,10 @@ export default function InsightsPage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const navigateTo = (path: string) => {
+    router.push(path);
   };
 
   const primaryInsight = insights.length > 0 ? insights[0] : null;
@@ -94,10 +100,10 @@ export default function InsightsPage() {
                 </p>
                 
                 <div className="flex gap-4">
-                  <button className="bg-mint text-white px-6 py-3 rounded-xl font-bold shadow-sm shadow-mint/20 hover:bg-deepmint transition-colors">
+                  <button onClick={() => navigateTo('/app/budgets')} className="bg-mint text-white px-6 py-3 rounded-xl font-bold shadow-sm shadow-mint/20 hover:bg-deepmint transition-colors">
                     {primaryInsight.action_type || 'Take Action'}
                   </button>
-                  <button className="bg-paper text-ink px-6 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors">
+                  <button onClick={() => navigateTo('/app/transactions')} className="bg-paper text-ink px-6 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors">
                     Show Breakdown
                   </button>
                 </div>
@@ -133,7 +139,7 @@ export default function InsightsPage() {
               </div>
             ) : otherInsights.length > 0 ? (
               otherInsights.map((insight: any, i: number) => (
-                <div key={i} className="border-l-2 border-amber pl-4 hover:bg-paper/50 p-2 -ml-2 rounded-r-lg cursor-pointer transition-colors">
+                <div onClick={() => navigateTo('/app/budgets')} key={i} className="border-l-2 border-amber pl-4 hover:bg-paper/50 p-2 -ml-2 rounded-r-lg cursor-pointer transition-colors">
                   <div className="font-medium">{insight.title}</div>
                   <div className="text-sm text-ink/60">{insight.description.substring(0, 60)}...</div>
                 </div>
@@ -155,7 +161,7 @@ export default function InsightsPage() {
           
           <div className="space-y-4">
             {insights.length > 0 ? (
-              <div className="bg-paper/50 p-4 rounded-xl">
+              <div onClick={() => navigateTo('/app/transactions')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors">
                 <div className="flex justify-between items-end mb-2">
                   <div className="font-bold text-coral">Dining Out</div>
                   <div className="font-bold">+42%</div>
@@ -184,10 +190,10 @@ export default function InsightsPage() {
           
           <div className="space-y-4">
             {insights.length > 0 ? (
-              <div className="group cursor-pointer">
+              <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer">
                 <div className="flex justify-between items-center mb-1">
-                  <div className="font-medium">Emergency Fund</div>
-                  <ArrowRight className="w-4 h-4 text-ink/40 group-hover:translate-x-1 transition-transform" />
+                  <div className="font-medium group-hover:text-mint transition-colors">Emergency Fund</div>
+                  <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
                 </div>
                 <div className="w-full bg-ink/5 h-1.5 rounded-full mb-2">
                   <div className="bg-deepmint h-full w-[65%]" />

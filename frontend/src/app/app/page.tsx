@@ -125,9 +125,9 @@ export default function OverviewPage() {
               <span className="px-2 py-0.5 bg-amber text-white text-[10px] font-bold rounded uppercase">New</span>
             </div>
             <p className="text-sm text-amber-900/80 mb-2">"{data.primaryInsight.description}"</p>
-            <button className="text-xs font-bold text-amber-700 bg-white px-3 py-1.5 rounded-md shadow-sm border border-amber/10 hover:bg-amber/5 transition-colors">
+            <Link href="/app/insights" className="text-xs font-bold text-amber-700 bg-white px-3 py-1.5 rounded-md shadow-sm border border-amber/10 hover:bg-amber/5 transition-colors inline-block">
               {data.primaryInsight.action_type || 'Review Action'}
-            </button>
+            </Link>
           </div>
         </div>
       )}

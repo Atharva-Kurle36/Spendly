@@ -81,18 +81,7 @@ expenses.post('/', async (c) => {
 
 app.route('/api/expenses', expenses);
 
-// Budgets Routes
-const budgets = new Hono<{ Bindings: Env; Variables: { user: any } }>();
-budgets.use('*', authMiddleware);
-
-budgets.get('/', async (c) => {
-  const user = c.get('user');
-  const repo = new BudgetRepository(c.env.DB);
-  const data = await repo.findAllByUserId(user.id);
-  return c.json({ success: true, data });
-});
-
-app.route('/api/budgets', budgets);
+// Budgets Routes removed here in favor of app.get('/api/budgets') below
 
 // AI Insights Route
 app.post('/api/insights/generate', authMiddleware, async (c) => {
@@ -240,10 +229,10 @@ app.get('/api/overview', authMiddleware, async (c) => {
   const { results: insights } = await c.env.DB.prepare('SELECT * FROM ai_insights WHERE user_id = ? AND is_dismissed = 0 ORDER BY created_at DESC LIMIT 1').bind(user.id).all();
 
   const { results: budgetsData } = await c.env.DB.prepare(`
-    SELECT b.amount as limit_amount, bp.spent_amount, c.name, c.color 
+    SELECT b.amount as limit_amount, c.name, c.color,
+           COALESCE((SELECT SUM(amount) FROM expenses e WHERE e.category_id = b.category_id AND e.user_id = b.user_id), 0) as spent_amount
     FROM budgets b 
-    JOIN budget_periods bp ON b.id = bp.budget_id 
-    JOIN categories c ON b.category_id = c.id
+    LEFT JOIN categories c ON b.category_id = c.id
     WHERE b.user_id = ?
   `).bind(user.id).all();
 
@@ -329,20 +318,33 @@ app.delete('/api/transactions', authMiddleware, async (c) => {
 });
 
 app.get('/api/budgets', authMiddleware, async (c) => {
-  const user = c.get('user');
-  const { results } = await c.env.DB.prepare(`
-    SELECT b.id, b.amount as limit_amount, bp.spent_amount, c.name, c.color, c.icon 
-    FROM budgets b 
-    JOIN budget_periods bp ON b.id = bp.budget_id 
-    JOIN categories c ON b.category_id = c.id
-    WHERE b.user_id = ?
-  `).bind(user.id).all();
-  return c.json({ success: true, data: results });
+  try {
+    const user = c.get('user');
+    const { results } = await c.env.DB.prepare(`
+      SELECT b.id, b.amount as limit_amount, c.name, c.color, c.icon,
+             COALESCE((SELECT SUM(amount) FROM expenses e WHERE e.category_id = b.category_id AND e.user_id = b.user_id), 0) as spent_amount
+      FROM budgets b 
+      LEFT JOIN categories c ON b.category_id = c.id
+      WHERE b.user_id = ?
+    `).bind(user.id).all();
+    return c.json({ success: true, data: results });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
 });
 
 app.post('/api/budgets', authMiddleware, async (c) => {
   const user = c.get('user');
   const body = await c.req.json();
+  
+  // Check if budget for this category already exists
+  const { results: existing } = await c.env.DB.prepare('SELECT id FROM budgets WHERE user_id = ? AND category_id = ?')
+    .bind(user.id, body.category_id).all();
+    
+  if (existing.length > 0) {
+    return c.json({ success: false, error: 'A budget for this category already exists. Please edit the existing budget.' }, 400);
+  }
+
   const budgetId = crypto.randomUUID();
   
   await c.env.DB.prepare('INSERT INTO budgets (id, user_id, category_id, amount, period) VALUES (?, ?, ?, ?, ?)')
@@ -352,6 +354,36 @@ app.post('/api/budgets', authMiddleware, async (c) => {
     .bind(crypto.randomUUID(), budgetId, new Date().toISOString(), new Date(new Date().setMonth(new Date().getMonth()+1)).toISOString(), 0).run();
 
   return c.json({ success: true, message: 'Budget created successfully' });
+});
+
+app.put('/api/budgets/:id', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user');
+    const budgetId = c.req.param('id');
+    const body = await c.req.json();
+    
+    await c.env.DB.prepare('UPDATE budgets SET amount = ? WHERE id = ? AND user_id = ?')
+      .bind(Math.round(body.amount * 100), budgetId, user.id).run();
+
+    return c.json({ success: true, message: 'Budget updated successfully' });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+app.delete('/api/budgets/:id', authMiddleware, async (c) => {
+  try {
+    const user = c.get('user');
+    const budgetId = c.req.param('id');
+    
+    // Need to delete budget_periods as well due to foreign key (or rely on cascade, but safer to delete)
+    await c.env.DB.prepare('DELETE FROM budget_periods WHERE budget_id = ?').bind(budgetId).run();
+    await c.env.DB.prepare('DELETE FROM budgets WHERE id = ? AND user_id = ?').bind(budgetId, user.id).run();
+
+    return c.json({ success: true, message: 'Budget deleted successfully' });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
 });
 
 app.get('/api/bills', authMiddleware, async (c) => {
