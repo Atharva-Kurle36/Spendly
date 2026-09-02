@@ -16,6 +16,9 @@ export default function BudgetsPage() {
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
+  const [monthlySalary, setMonthlySalary] = useState(15000000); // Default ₹150,000
+  
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editBudgetId, setEditBudgetId] = useState<string | null>(null);
   
@@ -24,6 +27,8 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     fetchBudgets();
+    const savedSalary = localStorage.getItem('smartwallet_salary');
+    if (savedSalary) setMonthlySalary(Number(savedSalary));
   }, []);
 
   const fetchBudgets = async () => {
@@ -145,16 +150,21 @@ export default function BudgetsPage() {
           </>
         ) : (
           <>
+            <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm relative group">
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setIsSalaryModalOpen(true)} className="p-1.5 bg-white shadow-sm border border-ink/10 rounded-md text-ink/60 hover:text-ink hover:bg-ink/5 transition-colors">
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-sm font-semibold text-ink/50 uppercase tracking-wider mb-2">Monthly Salary</div>
+              <div className="font-display text-3xl font-bold mb-4 text-mint">{formatCurrency(monthlySalary)}</div>
+              <div className="text-sm text-ink/60">{(totalBudget / monthlySalary * 100).toFixed(0)}% of salary budgeted</div>
+            </div>
+
             <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
               <div className="text-sm font-semibold text-ink/50 uppercase tracking-wider mb-2">Total Monthly Budget</div>
               <div className="font-display text-3xl font-bold mb-4">{formatCurrency(totalBudget)}</div>
               <div className="text-sm text-ink/60">Across {budgets.length} active categories</div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
-              <div className="text-sm font-semibold text-ink/50 uppercase tracking-wider mb-2">Total Remaining</div>
-              <div className="font-display text-3xl font-bold mb-4">{formatCurrency(totalRemaining)}</div>
-              <div className="text-sm text-ink/60">Active month period</div>
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm bg-amber/5 border-amber/20">
@@ -281,6 +291,42 @@ export default function BudgetsPage() {
                   className="w-full bg-mint text-white py-3.5 rounded-xl font-bold hover:bg-deepmint transition-all shadow-sm shadow-mint/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Budget'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Salary Modal */}
+      {isSalaryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden border border-ink/5">
+            <div className="flex justify-between items-center p-6 border-b border-ink/5">
+              <h2 className="font-display text-xl font-bold">Manage Salary</h2>
+              <button type="button" onClick={() => setIsSalaryModalOpen(false)} className="p-2 hover:bg-ink/5 rounded-full transition-colors"><X className="w-5 h-5 text-ink/60" /></button>
+            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              localStorage.setItem('smartwallet_salary', monthlySalary.toString());
+              setIsSalaryModalOpen(false);
+            }} className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-ink/70 mb-1.5">Monthly Salary (₹)</label>
+                <input 
+                  type="number"
+                  value={monthlySalary / 100}
+                  onChange={(e) => setMonthlySalary(Number(e.target.value) * 100)}
+                  className="w-full px-4 py-3 rounded-xl border border-ink/10 focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint transition-all"
+                  required
+                />
+              </div>
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  className="w-full bg-mint text-white py-3.5 rounded-xl font-bold hover:bg-deepmint transition-all shadow-sm shadow-mint/20"
+                >
+                  Save Salary
                 </button>
               </div>
             </form>

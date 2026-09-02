@@ -11,6 +11,8 @@ export default function InsightsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [insights, setInsights] = useState<any[]>([]);
+  const [goals, setGoals] = useState<any[]>([]);
+  const [overview, setOverview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,13 +21,20 @@ export default function InsightsPage() {
 
   const fetchInsights = async () => {
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/insights`);
-      const json = await res.json();
-      if (json.success) {
-        setInsights(json.data);
-      }
+      const [insightsRes, goalsRes, overviewRes] = await Promise.all([
+        fetch(`${API_CONFIG.baseUrl}/insights`),
+        fetch(`${API_CONFIG.baseUrl}/goals`),
+        fetch(`${API_CONFIG.baseUrl}/overview`)
+      ]);
+      const insightsJson = await insightsRes.json();
+      const goalsJson = await goalsRes.json();
+      const overviewJson = await overviewRes.json();
+      
+      if (insightsJson.success) setInsights(insightsJson.data);
+      if (goalsJson.success) setGoals(goalsJson.data);
+      if (overviewJson.success) setOverview(overviewJson.data);
     } catch (err) {
-      console.error("Failed to fetch insights:", err);
+      console.error("Failed to fetch data:", err);
     } finally {
       setLoading(false);
     }
@@ -60,6 +69,30 @@ export default function InsightsPage() {
     if (!action) return 'Review Action';
     return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
+
+  // Dynamic calculations
+  let topGoal = goals.length > 0 ? goals[0] : null;
+  let estimatedDateStr = 'Unknown';
+  let goalProgress = 0;
+  if (topGoal) {
+    const remaining = Math.max(0, topGoal.target_amount - topGoal.current_amount);
+    const months = topGoal.monthly_contribution > 0 ? remaining / topGoal.monthly_contribution : 0;
+    const estDate = new Date();
+    estDate.setMonth(estDate.getMonth() + Math.ceil(months));
+    estimatedDateStr = estDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    goalProgress = Math.min(100, Math.round((topGoal.current_amount / topGoal.target_amount) * 100));
+  }
+
+  let topBudget = null;
+  let budgetPercent = 0;
+  if (overview && overview.budgetsData && overview.budgetsData.length > 0) {
+    topBudget = [...overview.budgetsData].sort((a, b) => 
+      ((b.spent_amount || 0) / (b.limit_amount || 1)) - ((a.spent_amount || 0) / (a.limit_amount || 1))
+    )[0];
+    if (topBudget) {
+      budgetPercent = Math.min(100, Math.round(((topBudget.spent_amount || 0) / (topBudget.limit_amount || 1)) * 100));
+    }
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -176,17 +209,27 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            <div onClick={() => navigateTo('/app/transactions')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors border border-ink/5 shadow-sm">
-              <div className="flex justify-between items-end mb-2">
-                <div className="font-bold text-coral flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4" /> Dining Out
+            {topBudget ? (
+              <div onClick={() => navigateTo('/app/budgets')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors border border-ink/5 shadow-sm">
+                <div className="flex justify-between items-end mb-2">
+                  <div className="font-bold text-coral flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4" /> {topBudget.name}
+                  </div>
+                  <div className={`font-bold ${budgetPercent > 85 ? 'text-coral' : 'text-mint'}`}>{budgetPercent}% Used</div>
                 </div>
-                <div className="font-bold text-coral">+42%</div>
+                <p className="text-sm text-ink/60 leading-relaxed">
+                  You have consumed {budgetPercent}% of your {topBudget.name} budget. {budgetPercent > 85 ? 'Try cutting back to stay within your limit.' : 'You are currently on track.'}
+                </p>
               </div>
-              <p className="text-sm text-ink/60 leading-relaxed">
-                You've shifted ₹12,000 from grocery shopping into dining out over the last 3 weeks. Try cooking at home to stay on budget.
-              </p>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
+                <TrendingDown className="w-8 h-8 text-ink/30" />
+                <div>
+                  <div className="font-bold text-ink">Analyzing Data...</div>
+                  <p className="text-sm font-medium text-ink/60">Requires active budgets and transactions to detect behavior shifts.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -200,18 +243,28 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer bg-paper/50 p-4 rounded-xl hover:bg-paper transition-colors border border-ink/5 shadow-sm">
-              <div className="flex justify-between items-center mb-2">
-                <div className="font-bold group-hover:text-mint transition-colors">Emergency Fund</div>
-                <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
+            {topGoal ? (
+              <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer bg-paper/50 p-4 rounded-xl hover:bg-paper transition-colors border border-ink/5 shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-bold group-hover:text-mint transition-colors">{topGoal.name}</div>
+                  <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
+                </div>
+                <div className="w-full bg-ink/10 h-2 rounded-full mb-3 overflow-hidden">
+                  <div className="bg-deepmint h-full transition-all duration-1000" style={{ width: `${goalProgress}%` }} />
+                </div>
+                <p className="text-sm text-ink/60 leading-relaxed">
+                  On track to complete by <span className="font-bold text-ink">{estimatedDateStr}</span> based on your target and monthly contribution. Keep it up!
+                </p>
               </div>
-              <div className="w-full bg-ink/10 h-2 rounded-full mb-3 overflow-hidden">
-                <div className="bg-deepmint h-full w-[65%]" />
+            ) : (
+              <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
+                <Target className="w-8 h-8 text-ink/30" />
+                <div>
+                  <div className="font-bold text-ink">No Active Goals</div>
+                  <p className="text-sm font-medium text-ink/60">Create a Savings Goal to get AI predictions on your completion timeline.</p>
+                </div>
               </div>
-              <p className="text-sm text-ink/60 leading-relaxed">
-                On track to complete by <span className="font-bold text-ink">Nov 14</span> based on your recent savings velocity. Keep it up!
-              </p>
-            </div>
+            )}
           </div>
         </div>
 
