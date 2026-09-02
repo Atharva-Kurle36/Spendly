@@ -15,6 +15,7 @@ const inter = Inter({
 import { AppNavBar } from "@/components/NavBarDemo";
 import Link from "next/link";
 import { BrainCircuit } from "lucide-react";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export const metadata: Metadata = {
   title: "SmartWallet AI",
@@ -29,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${inter.variable} antialiased`}>
       <body className="font-body bg-paper text-ink min-h-screen flex flex-col relative">
-        <AppNavBar />
-        {children}
+        <AuthProvider>
+          <AppNavBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,9 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LogOut, Settings } from 'lucide-react';
 import { MAIN_NAV, ROUTES } from '@/config';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) router.replace('/auth');
+  }, [loading, router, user]);
+
+  if (loading || !user) return null;
 
   return (
     <div className="flex h-screen bg-paper text-ink font-body">
@@ -47,7 +58,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Settings className="w-5 h-5" />
             Settings
           </Link>
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-coral hover:bg-coral/10 transition-colors">
+          <button onClick={() => { signOut(); router.replace('/auth'); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-coral hover:bg-coral/10 transition-colors">
             <LogOut className="w-5 h-5" />
             Sign Out
           </button>

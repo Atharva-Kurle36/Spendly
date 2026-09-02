@@ -59,7 +59,7 @@ export default function LandingPage() {
           Spendly
         </Link>
         <div>
-          <Link href="/app" className="bg-gradient-to-r from-ink to-ink/90 text-paper px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-ink/20 transition-all hover:-translate-y-0.5 font-semibold text-sm">
+          <Link href="/auth" className="bg-gradient-to-r from-ink to-ink/90 text-paper px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-ink/20 transition-all hover:-translate-y-0.5 font-semibold text-sm">
             Enter App
           </Link>
         </div>
@@ -86,7 +86,7 @@ export default function LandingPage() {
             Traditional expense trackers just show you history. Spendly actively analyzes your behavior, detects spending leaks, and predicts financial impacts <span className="font-semibold text-ink/80">before they happen.</span>
           </motion.p>
           <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
-            <Link href="/app" className="group bg-gradient-to-r from-mint to-deepmint text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-mint/30 transition-all hover:-translate-y-1 flex items-center gap-3">
+            <Link href="/auth" className="group bg-gradient-to-r from-mint to-deepmint text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-mint/30 transition-all hover:-translate-y-1 flex items-center gap-3">
               Get Started Free
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
