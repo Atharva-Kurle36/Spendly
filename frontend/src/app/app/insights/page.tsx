@@ -52,6 +52,11 @@ export default function InsightsPage() {
   const primaryInsight = insights.length > 0 ? insights[0] : null;
   const otherInsights = insights.slice(1);
 
+  const formatActionType = (action: string) => {
+    if (!action) return 'Review Action';
+    return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <header className="flex justify-between items-end">
@@ -101,7 +106,7 @@ export default function InsightsPage() {
                 
                 <div className="flex gap-4">
                   <button onClick={() => navigateTo('/app/budgets')} className="bg-mint text-white px-6 py-3 rounded-xl font-bold shadow-sm shadow-mint/20 hover:bg-deepmint transition-colors">
-                    {primaryInsight.action_type || 'Take Action'}
+                    {formatActionType(primaryInsight.action_type)}
                   </button>
                   <button onClick={() => navigateTo('/app/transactions')} className="bg-paper text-ink px-6 py-3 rounded-xl font-bold hover:bg-ink/5 transition-colors">
                     Show Breakdown
@@ -160,22 +165,13 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            {insights.length > 0 ? (
-              <div onClick={() => navigateTo('/app/transactions')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors">
-                <div className="flex justify-between items-end mb-2">
-                  <div className="font-bold text-coral">Dining Out</div>
-                  <div className="font-bold">+42%</div>
-                </div>
-                <p className="text-sm text-ink/60">
-                  You've shifted ₹12,000 from grocery shopping into dining out over the last 3 weeks.
-                </p>
+            <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
+              <TrendingDown className="w-8 h-8 text-ink/30" />
+              <div>
+                <div className="font-bold text-ink">Analyzing Data...</div>
+                <p className="text-sm font-medium text-ink/60">Requires 30 days of consistent transaction history to confidently detect spending behavior shifts.</p>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 opacity-60">
-                <TrendingDown className="w-8 h-8 text-ink/30" />
-                <p className="text-sm font-medium">Requires 30 days of history</p>
-              </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -189,25 +185,13 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            {insights.length > 0 ? (
-              <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer">
-                <div className="flex justify-between items-center mb-1">
-                  <div className="font-medium group-hover:text-mint transition-colors">Emergency Fund</div>
-                  <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
-                </div>
-                <div className="w-full bg-ink/5 h-1.5 rounded-full mb-2">
-                  <div className="bg-deepmint h-full w-[65%]" />
-                </div>
-                <p className="text-sm text-ink/60">
-                  On track to complete by <span className="font-medium text-ink">Nov 14</span> based on recent savings velocity.
-                </p>
+            <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
+              <Target className="w-8 h-8 text-ink/30" />
+              <div>
+                <div className="font-bold text-ink">No Active Goals</div>
+                <p className="text-sm font-medium text-ink/60">Create a Savings Goal to get AI predictions on your completion timeline.</p>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-4 text-center space-y-2 opacity-60">
-                <Target className="w-8 h-8 text-ink/30" />
-                <p className="text-sm font-medium">Add a Goal to predict</p>
-              </div>
-            )}
+            </div>
           </div>
         </div>
 

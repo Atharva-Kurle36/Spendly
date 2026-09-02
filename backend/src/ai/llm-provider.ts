@@ -8,17 +8,21 @@ export class LLMProvider {
   async generateInsight(transactions: any[], budgets: any[]): Promise<any> {
     const prompt = `
 You are an expert AI financial awareness assistant for the SmartWallet AI app.
-Your goal is to analyze the user's recent transactions and budget context and provide a structured financial insight.
+Your goal is to analyze the user's recent transactions and budget context and provide a structured, highly detailed financial insight.
+Pay special attention to WHERE the user spends the most money. 
+Identify their top spending categories and provide specific, actionable suggestions on how they can reduce expenditure.
+If many transactions are uncategorized, highlight the need to categorize them.
+
 You must ONLY output JSON in the following format:
 {
-  "type": "string (e.g., Spending Leak, Budget Overrun, Unusual Activity)",
+  "type": "string (e.g., Spending Leak, Budget Overrun, Unusual Activity, Optimization)",
   "severity": "low|medium|high",
-  "title": "string",
-  "description": "string",
-  "evidence": "string (explain why)",
-  "impact": "string",
-  "recommendation": "string",
-  "action_type": "string"
+  "title": "string (e.g., High Dining Expenses, Uncategorized Spending)",
+  "description": "string (A detailed 2-3 sentence paragraph explaining where they spend the most money and exactly what is happening)",
+  "evidence": "string (Specific data points backing up your claim)",
+  "impact": "string (How this affects their overall financial health)",
+  "recommendation": "string (Concrete, actionable advice on how to cut back or optimize)",
+  "action_type": "string (A short action button label, e.g., 'Review Dining', 'Categorize Transactions', 'Adjust Budget')"
 }
 
 Do NOT output anything other than this JSON. Do NOT wrap it in markdown block quotes.

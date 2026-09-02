@@ -207,6 +207,15 @@ app.get('/api/overview', authMiddleware, async (c) => {
     WHERE e.user_id = ? ORDER BY e.date DESC LIMIT 5
   `).bind(user.id).all();
 
+  // Dynamic Spending Trend (Last 7 Days)
+  const { results: trendData } = await c.env.DB.prepare(`
+    SELECT date(date) as day, SUM(amount) as daily_total
+    FROM expenses 
+    WHERE user_id = ? AND date >= date('now', '-7 days')
+    GROUP BY day
+    ORDER BY day ASC
+  `).bind(user.id).all();
+
   const { results: insights } = await c.env.DB.prepare('SELECT * FROM ai_insights WHERE user_id = ? AND is_dismissed = 0 ORDER BY created_at DESC LIMIT 1').bind(user.id).all();
 
   const { results: budgetsData } = await c.env.DB.prepare(`
@@ -255,6 +264,7 @@ app.get('/api/overview', authMiddleware, async (c) => {
       healthScore,
       healthStatus,
       recentTransactions,
+      spendingTrend: trendData,
       primaryInsight: insights[0] || null,
       budgetHealth: budgetsData,
       upcomingBills: bills

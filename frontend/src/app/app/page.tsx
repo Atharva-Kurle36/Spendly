@@ -66,6 +66,11 @@ export default function OverviewPage() {
     }).format(paise / 100);
   };
 
+  const formatActionType = (action: string) => {
+    if (!action) return 'Review Action';
+    return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6">
       
@@ -126,7 +131,7 @@ export default function OverviewPage() {
             </div>
             <p className="text-sm text-amber-900/80 mb-2">"{data.primaryInsight.description}"</p>
             <Link href="/app/insights" className="text-xs font-bold text-amber-700 bg-white px-3 py-1.5 rounded-md shadow-sm border border-amber/10 hover:bg-amber/5 transition-colors inline-block">
-              {data.primaryInsight.action_type || 'Review Action'}
+              {formatActionType(data.primaryInsight.action_type)}
             </Link>
           </div>
         </div>
@@ -141,16 +146,16 @@ export default function OverviewPage() {
           <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm h-96 flex flex-col">
             <h3 className="font-bold text-lg mb-4">Spending Trend</h3>
             <div className="flex-1 w-full relative">
-              {(!data?.recentTransactions || data.recentTransactions.length === 0) && (
+              {(!data?.spendingTrend || data.spendingTrend.length === 0) && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
                   <div className="text-ink/50 font-medium">No spending data yet.</div>
                   <Link href="/app/transactions" className="text-mint font-bold text-sm hover:underline mt-1">Import a Bank Statement</Link>
                 </div>
               )}
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data?.recentTransactions?.length > 0 ? [...data.recentTransactions].reverse().map((t: any) => ({
-                  name: new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                  amount: t.amount / 100
+                <AreaChart data={data?.spendingTrend?.length > 0 ? data.spendingTrend.map((t: any) => ({
+                  name: new Date(t.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                  amount: t.daily_total / 100
                 })) : [{ name: 'Mon', amount: 0 }, { name: 'Tue', amount: 0 }, { name: 'Wed', amount: 0 }]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
