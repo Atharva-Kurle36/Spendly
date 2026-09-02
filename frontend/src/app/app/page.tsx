@@ -146,14 +146,14 @@ export default function OverviewPage() {
           <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm h-96 flex flex-col">
             <h3 className="font-bold text-lg mb-4">Spending Trend</h3>
             <div className="flex-1 w-full relative">
-              {(!data?.spendingTrend || data.spendingTrend.length === 0) && (
+              {(!data?.trendData || data.trendData.length === 0) && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
                   <div className="text-ink/50 font-medium">No spending data yet.</div>
                   <Link href="/app/transactions" className="text-mint font-bold text-sm hover:underline mt-1">Import a Bank Statement</Link>
                 </div>
               )}
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data?.spendingTrend?.length > 0 ? data.spendingTrend.map((t: any) => ({
+                <AreaChart data={data?.trendData?.length > 0 ? data.trendData.map((t: any) => ({
                   name: new Date(t.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
                   amount: t.daily_total / 100
                 })) : [{ name: 'Mon', amount: 0 }, { name: 'Tue', amount: 0 }, { name: 'Wed', amount: 0 }]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -220,10 +220,10 @@ export default function OverviewPage() {
             </div>
             
             <div className="space-y-6">
-              {data?.budgetHealth?.length === 0 && (
+              {(!data?.budgetsData || data.budgetsData.length === 0) && (
                 <div className="text-center text-ink/50 py-2">No active budgets.</div>
               )}
-              {data?.budgetHealth?.map((b: any, i: number) => {
+              {data?.budgetsData?.map((b: any, i: number) => {
                 const percent = Math.min(Math.round((b.spent_amount / b.limit_amount) * 100), 100);
                 return (
                   <div key={i}>

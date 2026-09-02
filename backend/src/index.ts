@@ -207,11 +207,11 @@ app.get('/api/overview', authMiddleware, async (c) => {
     WHERE e.user_id = ? ORDER BY e.date DESC LIMIT 5
   `).bind(user.id).all();
 
-  // Dynamic Spending Trend (Last 7 Days)
+  // Dynamic Spending Trend (Last 30 Days)
   const { results: trendData } = await c.env.DB.prepare(`
     SELECT date(date) as day, SUM(amount) as daily_total
     FROM expenses 
-    WHERE user_id = ? AND date >= date('now', '-7 days')
+    WHERE user_id = ? AND date >= date('now', '-30 days')
     GROUP BY day
     ORDER BY day ASC
   `).bind(user.id).all();
