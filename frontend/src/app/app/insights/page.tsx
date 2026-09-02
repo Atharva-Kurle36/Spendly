@@ -85,8 +85,8 @@ export default function InsightsPage() {
 
   let topBudget = null;
   let budgetPercent = 0;
-  if (overview && overview.budgetsData && overview.budgetsData.length > 0) {
-    topBudget = [...overview.budgetsData].sort((a, b) => 
+  if (overview) {
+    topBudget = [...(overview.budgetHealth || [])].sort((a: any, b: any) => 
       ((b.spent_amount || 0) / (b.limit_amount || 1)) - ((a.spent_amount || 0) / (a.limit_amount || 1))
     )[0];
     if (topBudget) {
