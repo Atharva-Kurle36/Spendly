@@ -216,7 +216,7 @@ app.get('/api/overview', authMiddleware, async (c) => {
     ORDER BY day ASC
   `).bind(user.id).all();
 
-  const { results: insights } = await c.env.DB.prepare('SELECT * FROM ai_insights WHERE user_id = ? AND is_dismissed = 0 ORDER BY created_at DESC LIMIT 1').bind(user.id).all();
+  const { results: insights } = await c.env.DB.prepare('SELECT * FROM ai_insights WHERE user_id = ? AND is_dismissed = 0 AND id != "insight_1" ORDER BY created_at DESC LIMIT 1').bind(user.id).all();
 
   const { results: budgetsData } = await c.env.DB.prepare(`
     SELECT b.amount as limit_amount, c.name, c.color,
@@ -227,6 +227,8 @@ app.get('/api/overview', authMiddleware, async (c) => {
   `).bind(user.id).all();
 
   const { results: bills } = await c.env.DB.prepare('SELECT * FROM bills WHERE user_id = ? AND status = "pending" ORDER BY due_date ASC LIMIT 2').bind(user.id).all();
+
+  const { results: goals } = await c.env.DB.prepare('SELECT * FROM savings_goals WHERE user_id = ?').bind(user.id).all();
 
   // Dynamic Health Score Logic (0-100) based on spending vs balance. 
   // If no balance, fallback to 50. If totalSpent is higher than totalBalance, score goes down.
@@ -267,7 +269,8 @@ app.get('/api/overview', authMiddleware, async (c) => {
       spendingTrend: trendData,
       primaryInsight: insights[0] || null,
       budgetHealth: budgetsData,
-      upcomingBills: bills
+      upcomingBills: bills,
+      goals: goals
     }
   });
 });

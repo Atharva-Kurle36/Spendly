@@ -9,6 +9,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function OverviewPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [monthlySalary, setMonthlySalary] = useState(0);
 
   useEffect(() => {
     async function loadData() {
@@ -25,6 +26,9 @@ export default function OverviewPage() {
       }
     }
     loadData();
+    
+    const savedSalary = localStorage.getItem('monthlySalary');
+    if (savedSalary) setMonthlySalary(Number(savedSalary));
   }, []);
 
   if (loading) {
@@ -136,6 +140,54 @@ export default function OverviewPage() {
           </div>
         </div>
       )}
+
+      {/* Secondary Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Monthly Salary */}
+        <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
+          <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Monthly Salary</div>
+          <div className="font-display text-2xl font-bold text-ink mb-1">
+            {formatCurrency(monthlySalary * 100)}
+          </div>
+          <div className="text-sm font-medium text-ink/50">Stored in settings</div>
+        </div>
+
+        {/* Total Monthly Budget */}
+        <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
+          <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Total Budget</div>
+          <div className="font-display text-2xl font-bold text-ink mb-1">
+            {formatCurrency(data?.budgetHealth?.reduce((acc: number, b: any) => acc + (b.limit_amount || 0), 0) || 0)}
+          </div>
+          <div className="text-sm font-medium text-ink/50">Active category limits</div>
+        </div>
+
+        {/* Goal Predictions */}
+        <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
+          <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Top Goal Prediction</div>
+          {data?.goals?.length > 0 ? (
+            (() => {
+              const topGoal = data.goals[0];
+              const remaining = Math.max(0, topGoal.target_amount - topGoal.current_amount);
+              const months = topGoal.monthly_contribution > 0 ? remaining / topGoal.monthly_contribution : 0;
+              const estDate = new Date();
+              estDate.setMonth(estDate.getMonth() + Math.ceil(months));
+              return (
+                <>
+                  <div className="font-display text-2xl font-bold text-mint mb-1">
+                    {estDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </div>
+                  <div className="text-sm font-medium text-ink/50">To reach {topGoal.name}</div>
+                </>
+              );
+            })()
+          ) : (
+            <>
+              <div className="font-display text-2xl font-bold text-ink/30 mb-1">No Goals</div>
+              <div className="text-sm font-medium text-ink/50">Create a savings goal</div>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
