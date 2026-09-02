@@ -1,16 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "smartwallet-ai-backend",
+  "name": "spendly",
   "main": "src/index.ts",
   "compatibility_date": "2024-03-20",
+  "account_id": "32b98da00fba61f4bbdb1963298a9b75",
   "compatibility_flags": [
     "nodejs_compat"
   ],
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "smartwallet_ai",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_name": "spendly",
+      "database_id": "4ca3e68a-56d5-447f-b26b-4db3f3aa8530",
       "migrations_dir": "../database/migrations"
     }
   ],

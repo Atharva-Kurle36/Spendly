@@ -3,7 +3,9 @@ import { Context, Next } from 'hono';
 export const authMiddleware = async (c: Context, next: Next) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return c.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, 401);
+    // Hackathon Fallback: If no token is provided, assume default user
+    c.set('user', { id: 'user_12345', email: 'aryan@example.com', name: 'Aryan' });
+    return await next();
   }
 
   const token = authHeader.split(' ')[1];
