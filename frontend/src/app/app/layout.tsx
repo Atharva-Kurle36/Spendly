@@ -25,16 +25,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {MAIN_NAV.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
-            
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${
-                  isActive 
-                    ? 'bg-mint/10 text-mint' 
-                    : 'text-ink/70 hover:bg-ink/5 hover:text-ink'
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors ${isActive
+                  ? 'bg-mint/10 text-mint'
+                  : 'text-ink/70 hover:bg-ink/5 hover:text-ink'
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 {item.name}

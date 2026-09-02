@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+:root {
+  --nav-bg: rgba(247, 249, 245, 0.6);
+  /* paper low opacity */
+  --nav-border: rgba(23, 33, 27, 0.1);
+  /* ink low opacity for border */
+  --nav-text: #17211B;
+  /* ink */
+  --nav-accent: #2FA36B;
+  /* mint */
+  --nav-active-bg: rgba(47, 163, 107, 0.2);
+  /* mint tint, increased opacity so the animated pill is visible */
+}
+
 @theme {
   --color-ink: #17211B;
   --color-paper: #F7F9F5;
@@ -7,9 +20,13 @@
   --color-deepmint: #176B4A;
   --color-amber: #E7A52B;
   --color-coral: #D95C55;
-  
+
   --font-display: var(--font-dm-sans), sans-serif;
   --font-body: var(--font-inter), sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -17,4 +34,3 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
 }
-

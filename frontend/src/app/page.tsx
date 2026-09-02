@@ -50,25 +50,20 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-paper text-ink font-body selection:bg-mint selection:text-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 p-5 px-8 flex justify-between items-center z-50 bg-paper/80 backdrop-blur-xl border-b border-ink/5">
-        <div className="font-display font-bold text-xl tracking-tight flex items-center gap-2.5">
+      {/* Header for Landing Page */}
+      <header className="absolute top-0 left-0 right-0 p-5 px-8 flex justify-between items-center z-[90]">
+        <Link href="/" className="font-display font-bold text-xl tracking-tight flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="w-9 h-9 bg-gradient-to-br from-mint to-deepmint rounded-xl flex items-center justify-center shadow-lg shadow-mint/20">
             <BrainCircuit className="w-5 h-5 text-white" />
           </div>
           Spendly
-        </div>
-        <nav className="flex items-center gap-8 text-sm font-medium">
-          <a href="#features" className="text-ink/60 hover:text-mint transition-colors hidden md:block">Features</a>
-          <a href="#how-it-works" className="text-ink/60 hover:text-mint transition-colors hidden md:block">How It Works</a>
-          <a href="#stats" className="text-ink/60 hover:text-mint transition-colors hidden md:block">Why Spendly</a>
-          <Link href="/about" className="text-ink/60 hover:text-mint transition-colors">About</Link>
-          <Link href="/app" className="bg-gradient-to-r from-ink to-ink/90 text-paper px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-ink/20 transition-all hover:-translate-y-0.5 font-semibold">
+        </Link>
+        <div>
+          <Link href="/app" className="bg-gradient-to-r from-ink to-ink/90 text-paper px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-ink/20 transition-all hover:-translate-y-0.5 font-semibold text-sm">
             Enter App
           </Link>
-        </nav>
+        </div>
       </header>
-
       {/* Hero Section */}
       <main className="pt-36 pb-20 px-6 max-w-7xl mx-auto">
         <motion.div
