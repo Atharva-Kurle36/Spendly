@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { UploadCloud, Search, Filter, Plus, FileText, Trash2, X } from 'lucide-react';
+import { UploadCloud, Search, Filter, Plus, FileText, Trash2, X, Utensils, ShoppingBag, Car, Zap } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { API_CONFIG } from '@/config';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+const IconMap: Record<string, React.ReactNode> = {
+  'Utensils': <Utensils className="w-6 h-6" />,
+  'ShoppingBag': <ShoppingBag className="w-6 h-6" />,
+  'Car': <Car className="w-6 h-6" />,
+  'Zap': <Zap className="w-6 h-6" />
+};
 
 export default function TransactionsPage() {
   const [isUploading, setIsUploading] = useState(false);
@@ -240,7 +247,7 @@ export default function TransactionsPage() {
               <div key={t.id} className="p-4 hover:bg-paper/50 transition-colors flex items-center justify-between group cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white" style={{ backgroundColor: t.color || '#374151' }}>
-                    {t.icon ? <span className="text-xl">{t.icon}</span> : <span className="font-bold text-lg">{t.merchant.charAt(0)}</span>}
+                    {t.icon && IconMap[t.icon] ? IconMap[t.icon] : <span className="font-bold text-lg">{t.merchant.charAt(0).toUpperCase()}</span>}
                   </div>
                   <div>
                     <div className="font-bold text-lg">{t.merchant}</div>
