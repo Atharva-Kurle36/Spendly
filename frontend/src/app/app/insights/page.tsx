@@ -77,7 +77,7 @@ export default function InsightsPage() {
         </button>
       </header>
 
-      {loading ? (
+      {loading || isGenerating ? (
         <div className="bg-gradient-to-br from-mint/20 via-deepmint/10 to-transparent p-1 rounded-3xl animate-pulse">
           <div className="bg-white rounded-[23px] p-8 h-64 flex gap-4">
              <div className="w-12 h-12 rounded-xl bg-mint/10"></div>
@@ -165,27 +165,17 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            {insights.length > 0 ? (
-              <div onClick={() => navigateTo('/app/transactions')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors border border-ink/5">
-                <div className="flex justify-between items-end mb-2">
-                  <div className="font-bold text-coral flex items-center gap-2">
-                    <TrendingDown className="w-4 h-4" /> Dining Out
-                  </div>
-                  <div className="font-bold text-coral">+42%</div>
+            <div onClick={() => navigateTo('/app/transactions')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors border border-ink/5 shadow-sm">
+              <div className="flex justify-between items-end mb-2">
+                <div className="font-bold text-coral flex items-center gap-2">
+                  <TrendingDown className="w-4 h-4" /> Dining Out
                 </div>
-                <p className="text-sm text-ink/60 leading-relaxed">
-                  You've shifted ₹12,000 from grocery shopping into dining out over the last 3 weeks. Try cooking at home to stay on budget.
-                </p>
+                <div className="font-bold text-coral">+42%</div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
-                <TrendingDown className="w-8 h-8 text-ink/30" />
-                <div>
-                  <div className="font-bold text-ink">Analyzing Data...</div>
-                  <p className="text-sm font-medium text-ink/60">Requires 30 days of consistent transaction history to confidently detect spending behavior shifts.</p>
-                </div>
-              </div>
-            )}
+              <p className="text-sm text-ink/60 leading-relaxed">
+                You've shifted ₹12,000 from grocery shopping into dining out over the last 3 weeks. Try cooking at home to stay on budget.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -199,28 +189,18 @@ export default function InsightsPage() {
           </div>
           
           <div className="space-y-4">
-            {insights.length > 0 ? (
-              <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer bg-paper/50 p-4 rounded-xl hover:bg-paper transition-colors border border-ink/5">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="font-bold group-hover:text-mint transition-colors">Emergency Fund</div>
-                  <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
-                </div>
-                <div className="w-full bg-ink/10 h-2 rounded-full mb-3 overflow-hidden">
-                  <div className="bg-deepmint h-full w-[65%]" />
-                </div>
-                <p className="text-sm text-ink/60 leading-relaxed">
-                  On track to complete by <span className="font-bold text-ink">Nov 14</span> based on your recent savings velocity. Keep it up!
-                </p>
+            <div onClick={() => navigateTo('/app/goals')} className="group cursor-pointer bg-paper/50 p-4 rounded-xl hover:bg-paper transition-colors border border-ink/5 shadow-sm">
+              <div className="flex justify-between items-center mb-2">
+                <div className="font-bold group-hover:text-mint transition-colors">Emergency Fund</div>
+                <ArrowRight className="w-4 h-4 text-ink/40 group-hover:text-mint group-hover:translate-x-1 transition-all" />
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-6 text-center space-y-3 opacity-70">
-                <Target className="w-8 h-8 text-ink/30" />
-                <div>
-                  <div className="font-bold text-ink">No Active Goals</div>
-                  <p className="text-sm font-medium text-ink/60">Create a Savings Goal to get AI predictions on your completion timeline.</p>
-                </div>
+              <div className="w-full bg-ink/10 h-2 rounded-full mb-3 overflow-hidden">
+                <div className="bg-deepmint h-full w-[65%]" />
               </div>
-            )}
+              <p className="text-sm text-ink/60 leading-relaxed">
+                On track to complete by <span className="font-bold text-ink">Nov 14</span> based on your recent savings velocity. Keep it up!
+              </p>
+            </div>
           </div>
         </div>
 
