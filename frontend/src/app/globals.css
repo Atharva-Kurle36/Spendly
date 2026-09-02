@@ -29,6 +29,21 @@ html {
   scroll-behavior: smooth;
 }
 
+.landing-page {
+  --wallet-body: #17211B;
+  /* ink */
+  --wallet-flap: #176B4A;
+  /* deepmint */
+  --card-cash: #E7A52B;
+  /* amber */
+  --card-debit: #D95C55;
+  /* coral */
+  --card-credit: #2FA36B;
+  /* mint */
+  --accent: #2FA36B;
+  /* mint */
+}
+
 body {
   background-color: var(--color-paper);
   color: var(--color-ink);

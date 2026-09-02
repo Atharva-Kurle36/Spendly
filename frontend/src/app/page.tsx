@@ -9,6 +9,7 @@ import {
   Mail, Heart, CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import WalletScrollReveal from '@/components/landing/WalletScrollReveal';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -49,7 +50,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-paper text-ink font-body selection:bg-mint selection:text-white">
+    <div className="landing-page min-h-screen bg-paper text-ink font-body selection:bg-mint selection:text-white">
       {/* Header for Landing Page */}
       <header className="absolute top-0 left-0 right-0 p-5 px-8 flex justify-between items-center z-[90]">
         <Link href="/" className="font-display font-bold text-xl tracking-tight flex items-center gap-2.5 hover:opacity-80 transition-opacity">
@@ -209,6 +210,12 @@ export default function LandingPage() {
             )}
           </AnimatePresence>
         </div>
+        {/* Interactive Demo Section End */}
+
+        {/* Wallet Scrollytelling Section */}
+        <section id="how-it-works" className="-mx-6 md:mx-auto">
+          <WalletScrollReveal />
+        </section>
 
         {/* Features Section */}
         <section id="features" className="mb-32">
