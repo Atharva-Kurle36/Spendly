@@ -1,5 +1,5 @@
 export const env = {
-  API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787/api',
+  API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8788/api',
   FIREBASE: {
     API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
     AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
