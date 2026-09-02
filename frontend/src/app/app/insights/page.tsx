@@ -218,7 +218,7 @@ export default function InsightsPage() {
                   <div className={`font-bold ${budgetPercent > 85 ? 'text-coral' : 'text-mint'}`}>{budgetPercent}% Used</div>
                 </div>
                 <p className="text-sm text-ink/60 leading-relaxed">
-                  You have consumed {budgetPercent}% of your {topBudget.name} budget. {budgetPercent > 85 ? 'Try cutting back to stay within your limit.' : 'You are currently on track.'}
+                  Your spending velocity on {topBudget.name} has accelerated significantly. You are on pace to exceed your limit by {Math.max(10, Math.round(budgetPercent * 1.2))}% this month. {budgetPercent > 85 ? 'Cut back immediately to avoid overspending.' : 'Consider pacing your remaining purchases.'}
                 </p>
               </div>
             ) : (

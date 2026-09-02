@@ -167,11 +167,21 @@ export default function BudgetsPage() {
               <div className="text-sm text-ink/60">Across {budgets.length} active categories</div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm bg-amber/5 border-amber/20">
-              <div className="text-sm font-semibold text-amber-900/60 uppercase tracking-wider mb-2">Predictive Warning</div>
-              <div className="font-display text-xl font-bold mb-2 text-amber-900">Track Carefully</div>
-              <div className="text-sm text-amber-900/80">You have consumed {Math.round((totalSpent / (totalBudget || 1)) * 100)}% of your total budget.</div>
-            </div>
+            {(() => {
+              const pct = Math.round((totalSpent / (totalBudget || 1)) * 100);
+              const isDanger = pct > 85;
+              const isWarning = pct > 50 && pct <= 85;
+              const statusBg = isDanger ? 'bg-coral/5 border-coral/20' : isWarning ? 'bg-amber/5 border-amber/20' : 'bg-mint/5 border-mint/20';
+              const statusText = isDanger ? 'text-coral-900' : isWarning ? 'text-amber-900' : 'text-mint-900';
+              const title = isDanger ? 'Critical Warning' : isWarning ? 'Track Carefully' : 'On Track';
+              return (
+                <div className={`bg-white p-6 rounded-2xl border shadow-sm ${statusBg}`}>
+                  <div className={`text-sm font-semibold opacity-60 uppercase tracking-wider mb-2 ${statusText}`}>Predictive Status</div>
+                  <div className={`font-display text-xl font-bold mb-2 ${statusText}`}>{title}</div>
+                  <div className={`text-sm opacity-80 ${statusText}`}>You have consumed {pct}% of your total budget.</div>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>
