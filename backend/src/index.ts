@@ -409,6 +409,17 @@ app.post('/api/goals', authMiddleware, async (c) => {
   return c.json({ success: true, message: 'Goal created successfully' });
 });
 
+app.post('/api/goals/:id/add-funds', authMiddleware, async (c) => {
+  const user = c.get('user');
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  
+  await c.env.DB.prepare('UPDATE savings_goals SET current_amount = current_amount + ? WHERE id = ? AND user_id = ?')
+    .bind(Math.round(body.amount * 100), id, user.id).run();
+
+  return c.json({ success: true, message: 'Funds added to goal successfully' });
+});
+
 app.get('/api/insights', authMiddleware, async (c) => {
   const user = c.get('user');
   const { results } = await c.env.DB.prepare('SELECT * FROM ai_insights WHERE user_id = ? AND is_dismissed = 0 ORDER BY created_at DESC').bind(user.id).all();

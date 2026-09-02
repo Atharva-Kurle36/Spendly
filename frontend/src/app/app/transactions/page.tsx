@@ -7,7 +7,7 @@ import { API_CONFIG } from '@/config';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export default function TransactionsPage() {
   const [isUploading, setIsUploading] = useState(false);
@@ -85,6 +85,9 @@ export default function TransactionsPage() {
         extractedText = await selectedFile.text();
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
       const res = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.transactions.import}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,8 +95,11 @@ export default function TransactionsPage() {
           filename: selectedFile.name, 
           text: extractedText,
           income: income ? Number(income) : undefined
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const data = await res.json();
       if (!data.success) throw new Error(data.error?.message);

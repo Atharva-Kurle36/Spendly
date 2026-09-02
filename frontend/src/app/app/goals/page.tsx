@@ -9,6 +9,9 @@ export default function GoalsPage() {
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false);
+  const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
+  const [fundAmount, setFundAmount] = useState('');
   const [newGoal, setNewGoal] = useState({ name: '', target_amount: '', monthly_contribution: '', target_date: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,6 +66,30 @@ export default function GoalsPage() {
       fetchGoals();
     } catch (err) {
       alert('Failed to create goal.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAddFunds = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fundAmount || !selectedGoalId) return;
+    
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_CONFIG.baseUrl}/goals/${selectedGoalId}/add-funds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Number(fundAmount) })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error("Failed");
+      
+      setIsFundModalOpen(false);
+      setFundAmount('');
+      fetchGoals();
+    } catch (err) {
+      alert('Failed to add funds.');
     } finally {
       setIsSubmitting(false);
     }
@@ -139,9 +166,16 @@ export default function GoalsPage() {
                   
                   <div className="flex justify-between items-center text-sm">
                     <span className={`font-medium ${isPrimary ? 'text-deepmint' : 'text-mint'}`}>{percent}% Completed</span>
-                    <span className="text-ink/50 flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" /> Est. {goal.target_date ? new Date(goal.target_date).toLocaleDateString() : 'Unknown'}
-                    </span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGoalId(goal.id);
+                        setIsFundModalOpen(true);
+                      }}
+                      className="text-mint font-bold hover:underline"
+                    >
+                      + Add Funds
+                    </button>
                   </div>
                 </div>
               );
@@ -215,6 +249,40 @@ export default function GoalsPage() {
                   className="w-full bg-mint text-white py-3.5 rounded-xl font-bold hover:bg-deepmint transition-all shadow-sm shadow-mint/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? 'Creating...' : 'Save Goal'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Funds Modal */}
+      {isFundModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden border border-ink/5">
+            <div className="flex justify-between items-center p-6 border-b border-ink/5">
+               <h2 className="font-display text-xl font-bold">Add Saved Funds</h2>
+               <button onClick={() => setIsFundModalOpen(false)} className="p-2 hover:bg-ink/5 rounded-full transition-colors"><X className="w-5 h-5 text-ink/60" /></button>
+            </div>
+            <form onSubmit={handleAddFunds} className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-ink/70 mb-1.5">Amount Saved (₹)</label>
+                <input 
+                  type="number"
+                  placeholder="e.g. 5000"
+                  value={fundAmount}
+                  onChange={(e) => setFundAmount(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-ink/10 focus:outline-none focus:ring-2 focus:ring-mint/20 focus:border-mint transition-all"
+                  required
+                />
+              </div>
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-mint text-white py-3.5 rounded-xl font-bold hover:bg-deepmint transition-all shadow-sm shadow-mint/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Saving...' : 'Add to Goal'}
                 </button>
               </div>
             </form>
