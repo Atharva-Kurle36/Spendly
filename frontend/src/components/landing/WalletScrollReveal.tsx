@@ -32,14 +32,6 @@ const SECTIONS: WalletSection[] = [
         heightClass: "min-h-[120vh]",
     },
     {
-        id: "cash",
-        badge: "Cash spending",
-        title: "Even the cash you spend, tracked",
-        description:
-            "Cash is the money that usually disappears without a trace — the chai, the auto fare, the quick cash tip. Log it in seconds right after you spend it, and it's categorized instantly alongside everything else, so it stops vanishing from the picture entirely.",
-        heightClass: "min-h-screen",
-    },
-    {
         id: "debit",
         badge: "Debit card",
         title: "Everyday spending, understood",
@@ -54,6 +46,14 @@ const SECTIONS: WalletSection[] = [
         title: "Bills and credit, kept in check",
         description:
             "Track credit card spend against your budget in real time, and get an alert before a bill catches you off guard.",
+        heightClass: "min-h-[120vh]",
+    },
+    {
+        id: "cash",
+        badge: "Cash spending",
+        title: "Even the cash you spend, tracked",
+        description:
+            "Cash is the money that usually disappears without a trace — the chai, the auto fare, the quick cash tip. Log it in seconds right after you spend it, and it's categorized instantly alongside everything else, so it stops vanishing from the picture entirely.",
         actions: [
             { label: "Get started free", variant: "primary" },
             { label: "Learn more", variant: "secondary" },
@@ -107,9 +107,9 @@ export default function WalletScrollReveal({ className }: { className?: string }
     }, [updateActiveSection]);
 
     const isOpen = activeIndex >= 1;
-    const showCash = activeIndex >= 2;
-    const showDebit = activeIndex >= 3;
-    const showCredit = activeIndex >= 4;
+    const showDebit = activeIndex >= 2;
+    const showCredit = activeIndex >= 3;
+    const showCash = activeIndex >= 4;
 
     return (
         <div className={cn("relative w-full max-w-7xl mx-auto py-12 md:py-0 md:flex md:items-start mb-[30vh] md:mb-[40vh]", className)} ref={scrollWrapperRef}>
@@ -169,50 +169,119 @@ export default function WalletScrollReveal({ className }: { className?: string }
 
                     {/* Cards stack */}
 
-                    {/* Cash Stack (Warm tone, paper texture simulation) */}
+                    {/* Debit Card (Lowest Layer) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15]",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-[#ffffff20] p-3 flex flex-col justify-between overflow-hidden",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCash ? "top-[-50px] opacity-100 rotate-[-4deg]" : "top-2 opacity-0 rotate-0"
-                        )}
-                        style={{
-                            background: "linear-gradient(145deg, #d4c5a0 0%, #a89467 100%)",
-                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)",
-                            transform: "translateZ(10px)"
-                        }}
-                    >
-                        {/* Fake cash banding/texture */}
-                        <div className="absolute inset-x-3 top-3 bottom-3 border border-[#ffffff30] rounded opacity-50" />
-                    </div>
-
-                    {/* Debit Card (Cool Dark tone with brushed metal sheen) */}
-                    <div
-                        className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-[#ffffff1a]",
-                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showDebit ? "top-[-20px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
+                            showDebit ? "top-[-60px] opacity-100 rotate-[-4deg]" : "top-2 opacity-0 rotate-0"
                         )}
                         style={{
                             background: "linear-gradient(120deg, #1e293b 0%, #0f172a 100%)",
-                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.15)",
-                            transform: "translateZ(20px)"
+                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.4), inset 0 -1px 2px rgba(0,0,0,0.4)",
+                            transform: "translateZ(10px)"
                         }}
-                    />
+                    >
+                        {/* Wavy light reflection */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-xl translate-x-10 -translate-y-10" />
 
-                    {/* Credit Card (Deep Warm Dark tone with subtle sheen) */}
+                        <div className="flex justify-between items-start relative z-10">
+                            <span className="text-white/90 font-bold text-[11px] tracking-widest flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-blue-400 opacity-80" /> SPENDLY
+                            </span>
+                            <span className="text-white/50 font-medium text-[9px] uppercase tracking-widest">Debit</span>
+                        </div>
+                        <div className="flex items-center gap-3 relative z-10">
+                            {/* Gold Chip */}
+                            <div className="w-8 h-6 rounded-md bg-gradient-to-br from-[#dfc37f] to-[#aa8022] border border-[#ffdf73]/50 shadow-sm flex flex-col justify-evenly px-1 relative overflow-hidden">
+                                <div className="absolute left-2 right-2 top-0 bottom-0 border-x border-black/10"></div>
+                                <div className="h-[1px] w-full bg-black/20"></div>
+                                <div className="h-[1px] w-full bg-black/20"></div>
+                            </div>
+                            {/* Contactless */}
+                            <svg className="w-4 h-4 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                                <path d="M5.5 16A8.5 8.5 0 0 1 5.5 8" />
+                                <path d="M9 18a11 11 0 0 1 0-12" />
+                                <path d="M12.5 20a13.5 13.5 0 0 1 0-16" />
+                                <path d="M16 22a16 16 0 0 1 0-20" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Credit Card (Middle Layer) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-[#ffffff20]",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-[#ffffff30] p-3 flex flex-col justify-between overflow-hidden",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCredit ? "top-[10px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
+                            showCredit ? "top-[-30px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
                         )}
                         style={{
-                            background: "linear-gradient(135deg, #4a1f28 0%, #240c12 100%)",
-                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.15)",
+                            background: "radial-gradient(circle at 100% 0%, #612231 0%, #1a080d 100%)",
+                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.3)",
+                            transform: "translateZ(20px)"
+                        }}
+                    >
+                        {/* Premium Geometric Pattern */}
+                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,1) 10px, rgba(255,255,255,1) 11px)" }}></div>
+                        <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full border border-white/20 opacity-40"></div>
+
+                        <div className="flex justify-end relative z-10">
+                            <span className="text-white/60 font-medium text-[9px] uppercase tracking-widest">Credit</span>
+                        </div>
+                        <div className="flex items-center gap-2 relative z-10">
+                            {/* Silver Chip */}
+                            <div className="w-8 h-6 rounded-md bg-gradient-to-br from-[#e0e0e0] to-[#888888] border border-white/40 shadow-sm flex flex-col justify-evenly px-1 relative overflow-hidden">
+                                <div className="absolute inset-x-2 top-0 bottom-0 border-x border-black/10"></div>
+                                <div className="h-[1px] w-full bg-black/20"></div>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-end relative z-10">
+                            <span className="text-white/50 font-mono text-[11px] tracking-[0.15em]">**** 9283</span>
+                            <span className="text-white/90 font-bold italic text-sm tracking-tighter">NYXA</span>
+                        </div>
+                    </div>
+
+                    {/* Cash Stack (Highest Layer) */}
+                    <div
+                        className={cn(
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15] overflow-visible",
+                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
+                            showCash ? "top-[10px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
+                        )}
+                        style={{
                             transform: "translateZ(30px)"
                         }}
-                    />
+                    >
+                        {/* Bottom fake cash layer */}
+                        <div className="absolute inset-0 top-1 bg-[#b8ab87] rounded-xl shadow-inner border border-[#fff]/10 translate-y-[3px] rotate-[1deg]" />
+                        {/* Middle fake cash layer */}
+                        <div className="absolute inset-0 top-1 bg-[#c5baa1] rounded-xl shadow-inner border border-[#fff]/20 translate-y-[1px] -rotate-[0.5deg]" />
+
+                        {/* Top primary note */}
+                        <div className="absolute inset-0 top-0 rounded-xl bg-gradient-to-br from-[#e8dec7] to-[#cac0a3] shadow-sm overflow-hidden" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)" }}>
+                            {/* Engraved bill border */}
+                            <div className="absolute inset-x-2 top-2 bottom-2 border border-[#818063]/60 rounded-md">
+                                <div className="absolute inset-1 border border-[#818063]/30 rounded"></div>
+                                {/* Corner art pieces */}
+                                <div className="absolute top-0 left-0 w-6 h-6 border-r border-b border-[#818063]/40 rounded-br-full" />
+                                <div className="absolute top-0 right-0 w-6 h-6 border-l border-b border-[#818063]/40 rounded-bl-full" />
+                                <div className="absolute bottom-0 left-0 w-6 h-6 border-r border-t border-[#818063]/40 rounded-tr-full" />
+                                <div className="absolute bottom-0 right-0 w-6 h-6 border-l border-t border-[#818063]/40 rounded-tl-full" />
+
+                                {/* Center Watermark */}
+                                <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border border-[#818063]/20 flex items-center justify-center bg-[#818063]/5">
+                                    <div className="w-12 h-12 rounded-full border border-[#818063]/10 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-full border border-[#818063]/5" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Paper Note Binder/Wrap Band */}
+                            <div className="absolute left-[50%] -translate-x-1/2 top-0 bottom-0 w-10 bg-gradient-to-r from-[#e3e2cf] via-[#f5f4e6] to-[#d6d5c3] shadow-[0_0_15px_rgba(0,0,0,0.5)] border-x border-[#c2bda7] flex justify-center items-center rounded-sm">
+                                <div className="w-full flex justify-center uppercase font-mono text-[9px] font-bold text-[#867f67] leading-none tracking-tight">₹1K</div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Wallet front flap (Matte Black Leather with Stitching effect) */}
                     <div
