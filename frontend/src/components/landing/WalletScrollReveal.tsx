@@ -10,6 +10,7 @@ interface WalletSection {
     title: string;
     description: string;
     actions?: { label: string; variant: "primary" | "secondary"; onClick?: () => void }[];
+    heightClass?: string;
 }
 
 const SECTIONS: WalletSection[] = [
@@ -18,24 +19,46 @@ const SECTIONS: WalletSection[] = [
         badge: "Your money, organized",
         title: "One wallet. Every rupee accounted for.",
         description:
-            "Scroll down and watch your wallet come to life — the same way this app brings your scattered spending into one clear view.",
+            "Cash in hand, money on cards, bills waiting to be paid — normally that's three different mental tabs open at once. Scroll down and watch what happens when it all lives in one place instead.",
+        heightClass: "min-h-screen",
     },
     {
         id: "opening",
-        badge: "Step one",
+        badge: "Step one — connect",
         title: "It all starts by opening up",
         description:
-            "Connect your accounts once. From there, every transaction flows into a single, organized view — no more digging through five different apps.",
+            "Link your bank accounts and cards once. From that moment, every transaction — big or small, planned or impulsive — flows automatically into a single, organized view. No manual entry, no spreadsheets, no five different banking apps to check every morning.",
+        actions: [{ label: "See how connecting works", variant: "secondary" }],
+        heightClass: "min-h-[120vh]",
     },
     {
         id: "cash",
         badge: "Cash spending",
         title: "Even the cash you spend, tracked",
         description:
-            "Log a cash expense in seconds and it's categorized instantly — so the money you can't see moving is still money you can see adding up.",
+            "Cash is the money that usually disappears without a trace — the chai, the auto fare, the quick cash tip. Log it in seconds right after you spend it, and it's categorized instantly alongside everything else, so it stops vanishing from the picture entirely.",
+        heightClass: "min-h-screen",
+    },
+    {
+        id: "debit",
+        badge: "Debit card",
+        title: "Everyday spending, understood",
+        description:
+            "Every swipe and UPI payment is categorized the moment it happens — groceries, food delivery, subscriptions, transport. Instead of finding out where your salary went at the end of the month, you see it building in real time, day by day.",
+        actions: [{ label: "See how categorization works", variant: "secondary" }],
+        heightClass: "min-h-[120vh]",
+    },
+    {
+        id: "credit",
+        badge: "Credit card",
+        title: "Bills and credit, kept in check",
+        description:
+            "Track credit card spend against your budget in real time, and get an alert before a bill catches you off guard.",
         actions: [
-            { label: "Get started free", variant: "primary" }
+            { label: "Get started free", variant: "primary" },
+            { label: "Learn more", variant: "secondary" },
         ],
+        heightClass: "min-h-screen",
     }
 ];
 
@@ -85,9 +108,11 @@ export default function WalletScrollReveal({ className }: { className?: string }
 
     const isOpen = activeIndex >= 1;
     const showCash = activeIndex >= 2;
+    const showDebit = activeIndex >= 3;
+    const showCredit = activeIndex >= 4;
 
     return (
-        <div className={cn("relative w-full max-w-7xl mx-auto py-12 md:py-0 md:flex md:items-start", className)} ref={scrollWrapperRef}>
+        <div className={cn("relative w-full max-w-7xl mx-auto py-12 md:py-0 md:flex md:items-start mb-[30vh] md:mb-[40vh]", className)} ref={scrollWrapperRef}>
 
             {/* Scrollable text sections (Left Side) */}
             <div className="relative z-20 w-full md:w-[50%] lg:w-[60%] order-2 md:order-1">
@@ -95,7 +120,7 @@ export default function WalletScrollReveal({ className }: { className?: string }
                     <section
                         key={section.id}
                         ref={(el) => { sectionRefs.current[index] = el; }}
-                        className="relative min-h-[60vh] md:min-h-screen flex flex-col justify-center px-4 md:px-12 backdrop-blur-sm md:backdrop-blur-none bg-paper/50 md:bg-transparent rounded-2xl md:rounded-none my-12 md:my-0 pb-12 md:pb-0"
+                        className={cn("relative flex flex-col justify-center px-4 md:px-12 backdrop-blur-sm md:backdrop-blur-none bg-paper/50 md:bg-transparent rounded-2xl md:rounded-none my-12 md:my-0 pb-12 md:pb-0", section.heightClass || "min-h-[60vh] md:min-h-screen")}
                     >
                         <p className="text-sm font-bold text-[--accent] mb-3 tracking-wider uppercase">{section.badge}</p>
                         <h2 className="text-3xl md:text-5xl font-display font-bold mb-4 leading-tight text-ink">{section.title}</h2>
@@ -132,7 +157,7 @@ export default function WalletScrollReveal({ className }: { className?: string }
                         transform: isOpen ? "rotateX(25deg) rotateY(-20deg) rotateZ(5deg)" : "rotateX(15deg) rotateY(-5deg) rotateZ(2deg)"
                     }}
                 >
-                    {/* Wallet back panel (with 3D thickness) */}
+                    {/* Wallet back panel */}
                     <div
                         className="absolute inset-0 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                         style={{ backgroundColor: "var(--wallet-body)", transform: "translateZ(-2px)" }}
@@ -147,6 +172,22 @@ export default function WalletScrollReveal({ className }: { className?: string }
                         )}
                         style={{ backgroundColor: "var(--card-cash)", transform: "translateZ(10px)" }}
                     />
+                    <div
+                        className={cn(
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-white/20",
+                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
+                            showDebit ? "top-[-15px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
+                        )}
+                        style={{ backgroundColor: "var(--card-debit)", transform: "translateZ(20px)" }}
+                    />
+                    <div
+                        className={cn(
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-white/20",
+                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
+                            showCredit ? "top-[15px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
+                        )}
+                        style={{ backgroundColor: "var(--card-credit)", transform: "translateZ(30px)" }}
+                    />
 
                     {/* Wallet front flap */}
                     <div
@@ -160,7 +201,7 @@ export default function WalletScrollReveal({ className }: { className?: string }
                             opacity: isOpen ? 0.95 : 1
                         }}
                     >
-                        {/* Small metallic wallet clasp/button */}
+                        {/* Clasp */}
                         <div className="w-12 h-2.5 rounded-full bg-white/20 border border-white/30 shadow-inner" />
                     </div>
                 </div>
