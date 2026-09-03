@@ -69,8 +69,14 @@ export class LLMProvider {
   }
 
   async generateInsight(transactions: any[], budgets: any[]): Promise<any> {
-    const prompt = `You are a financial AI. Analyze transactions and budgets. Output strict JSON only:
-{"type":"Spending Leak|Budget Overrun|Optimization","severity":"low|medium|high","title":"string","description":"2 sentences on where money is spent most","evidence":"string","impact":"string","recommendation":"string","action_type":"string"}
+    const prompt = `You are an expert financial analysis engine. Analyze the user's real transactions and budgets.
+RULES:
+1. Base your calculations strictly on the provided data. Convert amounts from paise to rupees (divide by 100).
+2. If spending in all categories is within budget limits, celebrate their high savings rate and give smart optimization tips.
+3. Calculate exact rupee amounts and percentages for top spending categories and budget utilization.
+4. Do NOT claim any category exceeded its budget unless spent_amount > limit_amount.
+Output strict JSON only:
+{"type":"Optimization|Spending Pattern|Budget Performance","severity":"low|medium|high","title":"string (concise summary with numbers)","description":"string (2 sentences detailing exact rupee amounts, percentages, and savings rate)","evidence":"string","impact":"string","recommendation":"string","action_type":"string"}
 
 Transactions:${JSON.stringify(transactions)}
 Budgets:${JSON.stringify(budgets)}`;
