@@ -217,9 +217,8 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
 app.get('/api/overview', authMiddleware, async (c) => {
   const user = c.get('user');
 
-  // Dynamic Live Data
-  const { results: accounts } = await c.env.DB.prepare('SELECT * FROM accounts WHERE user_id = ?').bind(user.id).all();
-  const totalBalance = accounts.reduce((sum: number, acc: any) => sum + acc.balance, 0);
+  // Detected Monthly Salary (₹85,000 in paise = 8500000)
+  const monthlySalary = 8500000;
 
   // Calculate true total spent (excluding any salary credits or non-expense records)
   const { results: allExpenses } = await c.env.DB.prepare(`
@@ -230,8 +229,8 @@ app.get('/api/overview', authMiddleware, async (c) => {
   `).bind(user.id).all();
   const totalSpent = (allExpenses[0]?.total as number) || 0;
 
-  // Detected Monthly Salary (₹85,000 in paise = 8500000)
-  const monthlySalary = 8500000;
+  // Total Balance = Salary - Total Spent
+  const totalBalance = Math.max(0, monthlySalary - totalSpent);
 
   // Get exactly 5 recent transactions with Category Join (so UI icons work properly)
   const { results: recentTransactions } = await c.env.DB.prepare(`

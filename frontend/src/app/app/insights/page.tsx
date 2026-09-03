@@ -65,6 +65,14 @@ export default function InsightsPage() {
     return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  const formatCurrency = (paise: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(paise / 100);
+  };
+
   // Dynamic calculations
   let topGoal = goals.length > 0 ? goals[0] : null;
   let estimatedDateStr = 'Unknown';
@@ -207,13 +215,17 @@ export default function InsightsPage() {
             {topBudget ? (
               <div onClick={() => navigateTo('/app/budgets')} className="bg-paper/50 p-4 rounded-xl cursor-pointer hover:bg-paper transition-colors border border-ink/5 shadow-sm">
                 <div className="flex justify-between items-end mb-2">
-                  <div className="font-bold text-coral flex items-center gap-2">
-                    <TrendingDown className="w-4 h-4" /> {topBudget.name}
+                  <div className="font-bold text-ink flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4 text-mint" /> {topBudget.name}
                   </div>
-                  <div className={`font-bold ${budgetPercent > 85 ? 'text-coral' : 'text-mint'}`}>{budgetPercent}% Used</div>
+                  <div className={`font-bold ${budgetPercent > 80 ? 'text-coral' : 'text-mint'}`}>{budgetPercent}% Used</div>
                 </div>
                 <p className="text-sm text-ink/60 leading-relaxed">
-                  Your spending velocity on {topBudget.name} has accelerated significantly. You are on pace to exceed your limit by {Math.max(10, Math.round(budgetPercent * 1.2))}% this month. {budgetPercent > 85 ? 'Cut back immediately to avoid overspending.' : 'Consider pacing your remaining purchases.'}
+                  {budgetPercent > 80 ? (
+                    `You have consumed ${budgetPercent}% of your ${topBudget.name} limit (${formatCurrency(topBudget.spent_amount)} of ${formatCurrency(topBudget.limit_amount)}). Pacing remaining purchases is recommended.`
+                  ) : (
+                    `Spending on ${topBudget.name} is well under control at ${budgetPercent}% utilized (${formatCurrency(topBudget.spent_amount)} of ${formatCurrency(topBudget.limit_amount)}). You have ${100 - budgetPercent}% buffer remaining.`
+                  )}
                 </p>
               </div>
             ) : (

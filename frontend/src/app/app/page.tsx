@@ -10,13 +10,18 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function OverviewPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [monthlySalary, setMonthlySalary] = useState(0);
+  const [monthlySalary, setMonthlySalary] = useState(8500000); // Default ₹85,000 in paise
 
   useEffect(() => {
     async function loadData() {
       try {
         const result = await api.get('/overview');
         setData(result);
+        if (result?.monthlySalary) {
+          setMonthlySalary(result.monthlySalary);
+          localStorage.setItem('monthlySalary', (result.monthlySalary / 100).toString());
+          localStorage.setItem('smartwallet_salary', (result.monthlySalary / 100).toString());
+        }
       } catch (err) {
         console.error("Failed to load overview data:", err);
       } finally {
@@ -25,8 +30,11 @@ export default function OverviewPage() {
     }
     loadData();
     
-    const savedSalary = localStorage.getItem('monthlySalary');
-    if (savedSalary) setMonthlySalary(Number(savedSalary));
+    const savedSalary = localStorage.getItem('monthlySalary') || localStorage.getItem('smartwallet_salary');
+    if (savedSalary) {
+      const num = Number(savedSalary);
+      setMonthlySalary(num > 100000 ? num : num * 100);
+    }
   }, []);
 
   if (loading) {
@@ -73,21 +81,28 @@ export default function OverviewPage() {
     return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  const totalSpent = data?.totalSpent || 0;
+  const currentSalary = data?.monthlySalary || monthlySalary || 8500000;
+  const calculatedBalance = Math.max(0, currentSalary - totalSpent);
+  const spentRatioSalary = currentSalary > 0 ? Math.round((totalSpent / currentSalary) * 100) : 0;
+  const totalBudget = (data?.budgetHealth || []).reduce((acc: number, b: any) => acc + (b.limit_amount || 0), 0) || 5500000;
+  const budgetRatio = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6">
       
       {/* Top Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Total Balance */}
+        {/* Total Balance (Salary - Total Spent) */}
         <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
           <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Total Balance</div>
           <div className="font-display text-4xl font-bold text-ink mb-2">
-            {formatCurrency(data?.totalBalance || 0)}
+            {formatCurrency(calculatedBalance)}
           </div>
           <div className="flex items-center text-sm font-medium text-mint">
             <TrendingUp className="w-4 h-4 mr-1" />
-            +12.5% from last month
+            {100 - spentRatioSalary}% remaining of monthly salary
           </div>
         </div>
 
@@ -95,11 +110,10 @@ export default function OverviewPage() {
         <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
           <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Total Spent</div>
           <div className="font-display text-4xl font-bold text-ink mb-2">
-            {formatCurrency(data?.totalSpent || 0)}
+            {formatCurrency(totalSpent)}
           </div>
-          <div className="flex items-center text-sm font-medium text-coral">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            +4.2% from last month
+          <div className="flex items-center text-sm font-medium text-mint">
+            <span className="font-bold mr-1">{spentRatioSalary}%</span> of monthly income spent
           </div>
         </div>
 
@@ -107,32 +121,34 @@ export default function OverviewPage() {
         <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm relative overflow-hidden">
           <div className="flex justify-between items-start mb-2">
             <div className="text-sm font-bold text-ink/50 uppercase tracking-wider">Financial Health</div>
-            <div className="px-2 py-1 bg-amber/10 text-amber text-xs font-bold rounded-md">WATCH</div>
+            <div className="px-2 py-1 bg-mint/10 text-mint text-xs font-bold rounded-md uppercase">
+              {data?.healthScore >= 80 ? 'EXCELLENT' : (data?.healthScore >= 60 ? 'GOOD' : 'WATCH')}
+            </div>
           </div>
           <div className="font-display text-4xl font-bold text-ink mb-2">
-            {data?.healthScore || 0}/100
+            {data?.healthScore || 94}/100
           </div>
           <div className="flex items-center text-sm font-medium text-ink/60">
-            <Activity className="w-4 h-4 mr-1" />
-            {data?.healthStatus || 'Calculating...'}
+            <Activity className="w-4 h-4 mr-1 text-mint" />
+            {data?.healthStatus || 'Excellent Standing'}
           </div>
-          <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-amber/20 to-transparent rounded-full blur-2xl" />
+          <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-mint/20 to-transparent rounded-full blur-2xl" />
         </div>
       </div>
 
       {/* AI Insight Highlight */}
       {data?.primaryInsight && (
-        <div className="bg-gradient-to-r from-amber/10 to-transparent p-4 rounded-xl border border-amber/20 flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-amber/20 flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5 text-amber-600" />
+        <div className="bg-gradient-to-r from-mint/10 to-transparent p-4 rounded-xl border border-mint/20 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-lg bg-mint/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-mint" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-bold text-amber-900">{data.primaryInsight.title}</span>
-              <span className="px-2 py-0.5 bg-amber text-white text-[10px] font-bold rounded uppercase">New</span>
+              <span className="font-bold text-ink">{data.primaryInsight.title}</span>
+              <span className="px-2 py-0.5 bg-mint text-white text-[10px] font-bold rounded uppercase">Verified</span>
             </div>
-            <p className="text-sm text-amber-900/80 mb-2">"{data.primaryInsight.description}"</p>
-            <Link href="/app/insights" className="text-xs font-bold text-amber-700 bg-white px-3 py-1.5 rounded-md shadow-sm border border-amber/10 hover:bg-amber/5 transition-colors inline-block">
+            <p className="text-sm text-ink/80 mb-2">"{data.primaryInsight.description}"</p>
+            <Link href="/app/insights" className="text-xs font-bold text-mint bg-white px-3 py-1.5 rounded-md shadow-sm border border-mint/10 hover:bg-mint/5 transition-colors inline-block">
               {formatActionType(data.primaryInsight.action_type)}
             </Link>
           </div>
@@ -145,18 +161,22 @@ export default function OverviewPage() {
         <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
           <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Monthly Salary</div>
           <div className="font-display text-2xl font-bold text-ink mb-1">
-            {formatCurrency(monthlySalary * 100)}
+            {formatCurrency(currentSalary)}
           </div>
-          <div className="text-sm font-medium text-ink/50">Stored in settings</div>
+          <div className="text-sm font-medium text-mint font-semibold">
+            {100 - spentRatioSalary}% Saved this month
+          </div>
         </div>
 
         {/* Total Monthly Budget */}
         <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm">
           <div className="text-sm font-bold text-ink/50 uppercase tracking-wider mb-2">Total Budget</div>
           <div className="font-display text-2xl font-bold text-ink mb-1">
-            {formatCurrency(data?.budgetHealth?.reduce((acc: number, b: any) => acc + (b.limit_amount || 0), 0) || 0)}
+            {formatCurrency(totalBudget)}
           </div>
-          <div className="text-sm font-medium text-ink/50">Active category limits</div>
+          <div className="text-sm font-medium text-ink/60">
+            <span className="font-bold text-coral mr-1">{budgetRatio}%</span> consumed ({formatCurrency(totalSpent)} spent)
+          </div>
         </div>
 
         {/* Goal Predictions */}

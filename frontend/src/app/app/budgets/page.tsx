@@ -22,7 +22,7 @@ export default function BudgetsPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
-  const [monthlySalary, setMonthlySalary] = useState(15000000); // Default ₹150,000
+  const [monthlySalary, setMonthlySalary] = useState(8500000); // Default ₹85,000 in paise
   
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editBudgetId, setEditBudgetId] = useState<string | null>(null);
@@ -32,8 +32,26 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     fetchBudgets();
-    const savedSalary = localStorage.getItem('smartwallet_salary');
-    if (savedSalary) setMonthlySalary(Number(savedSalary));
+    
+    async function loadSalary() {
+      try {
+        const overview = await api.get('/overview');
+        if (overview?.monthlySalary) {
+          const paise = overview.monthlySalary > 500000 ? overview.monthlySalary : overview.monthlySalary * 100;
+          setMonthlySalary(paise);
+          localStorage.setItem('smartwallet_salary', paise.toString());
+          localStorage.setItem('monthlySalary', paise.toString());
+          return;
+        }
+      } catch (e) {}
+
+      const saved = localStorage.getItem('smartwallet_salary') || localStorage.getItem('monthlySalary');
+      if (saved) {
+        const num = Number(saved);
+        setMonthlySalary(num > 500000 ? num : num * 100);
+      }
+    }
+    loadSalary();
   }, []);
 
   const fetchBudgets = async () => {
@@ -317,6 +335,7 @@ export default function BudgetsPage() {
             <form onSubmit={(e) => {
               e.preventDefault();
               localStorage.setItem('smartwallet_salary', monthlySalary.toString());
+              localStorage.setItem('monthlySalary', monthlySalary.toString());
               setIsSalaryModalOpen(false);
             }} className="p-6 space-y-5">
               <div>

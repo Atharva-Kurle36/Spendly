@@ -13,13 +13,19 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem("monthlySalary") || localStorage.getItem("smartwallet_salary");
-    if (stored) setSalary(stored);
+    if (stored) {
+      const num = Number(stored);
+      setSalary((num > 500000 ? num / 100 : num).toString());
+    } else {
+      setSalary("85000");
+    }
   }, []);
 
   const handleSaveSalary = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("monthlySalary", salary);
-    localStorage.setItem("smartwallet_salary", salary);
+    const paise = (Number(salary) * 100).toString();
+    localStorage.setItem("monthlySalary", paise);
+    localStorage.setItem("smartwallet_salary", paise);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
