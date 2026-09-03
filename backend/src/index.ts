@@ -482,12 +482,21 @@ app.post('/api/insights/generate', authMiddleware, async (c) => {
   const user = c.get('user');
 
   try {
-    const { results: expenses } = await c.env.DB.prepare('SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 20').bind(user.id).all();
+    const { results: expenses } = await c.env.DB.prepare(`
+      SELECT e.merchant, e.amount, e.date, c.name as category_name 
+      FROM expenses e 
+      LEFT JOIN categories c ON e.category_id = c.id 
+      WHERE e.user_id = ? 
+        AND e.merchant NOT LIKE '%SALARY%' 
+        AND e.merchant NOT LIKE '%TECHCORP%'
+      ORDER BY e.date DESC LIMIT 20
+    `).bind(user.id).all();
+
     const { results: budgets } = await c.env.DB.prepare(`
-      SELECT b.amount as limit_amount, bp.spent_amount, c.name as category_name
+      SELECT b.amount as limit_amount, c.name as category_name,
+             COALESCE((SELECT SUM(amount) FROM expenses e WHERE e.category_id = b.category_id AND e.user_id = b.user_id AND e.merchant NOT LIKE '%SALARY%' AND e.merchant NOT LIKE '%TECHCORP%'), 0) as spent_amount
       FROM budgets b 
-      JOIN budget_periods bp ON b.id = bp.budget_id 
-      JOIN categories c ON b.category_id = c.id
+      LEFT JOIN categories c ON b.category_id = c.id
       WHERE b.user_id = ?
     `).bind(user.id).all();
 
