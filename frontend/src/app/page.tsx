@@ -316,7 +316,7 @@ export default function LandingPage() {
         </section>
 
         {/* Stats Section */}
-        <section id="stats" className="mb-32">
+        <section id="stats" className="mb-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -335,9 +335,8 @@ export default function LandingPage() {
                 </h2>
               </motion.div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                  { value: '₹2.4L', label: 'Average savings per user/year', sublabel: 'detected leaks' },
                   { value: '< 3s', label: 'AI processing time', sublabel: 'per statement' },
                   { value: '99.2%', label: 'Categorization accuracy', sublabel: 'AI-powered' },
                   { value: '24/7', label: 'Financial monitoring', sublabel: 'always watching' },
@@ -348,6 +347,59 @@ export default function LandingPage() {
                     </div>
                     <div className="text-paper/70 text-sm mt-2 font-medium">{stat.label}</div>
                     <div className="text-paper/40 text-xs mt-1">{stat.sublabel}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Under the Hood Section */}
+        <section id="under-the-hood" className="mb-32">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+            className="bg-gradient-to-br from-ink via-ink to-ink/95 rounded-3xl p-10 md:p-16 text-paper relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(47,163,107,0.15),transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(231,165,43,0.1),transparent_50%)]" />
+
+            <div className="relative z-10">
+              <motion.div variants={fadeUp} custom={0} className="text-center mb-14">
+                <span className="text-mint text-sm font-bold uppercase tracking-widest">Under The Hood</span>
+                <h2 className="font-display text-4xl md:text-5xl font-bold mt-4 tracking-tight text-white bg-clip-text">
+                  How Ledger Actually Works
+                </h2>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                {[
+                  {
+                    title: 'Learns your own patterns',
+                    desc: "Anomaly detection compares every expense to your own history in that category — not a generic average — so a big dinner is only flagged if it's unusual for you."
+                  },
+                  {
+                    title: 'Forecasts from your real pace',
+                    desc: "Your end-of-month projection is calculated from what you've actually spent so far, divided by days elapsed — and updates the moment you log something new."
+                  },
+                  {
+                    title: 'Budgets per category, not one number',
+                    desc: "Every category carries its own monthly budget and its own usage percentage, with a warning as soon as you cross 80% — before you're already over."
+                  },
+                  {
+                    title: 'One data model, no silos',
+                    desc: "Recurring bills and one-off expenses flow into the same category and analytics engine, so a subscription due soon and an overspend alert show up in the same feed."
+                  },
+                ].map((item, i) => (
+                  <motion.div key={item.title} variants={fadeUp} custom={i} className="text-left flex flex-col">
+                    <div className="font-display text-xl md:text-2xl font-black bg-gradient-to-r from-mint to-amber bg-clip-text text-transparent mb-3 leading-tight">
+                      {item.title}
+                    </div>
+                    <div className="text-paper/70 text-sm leading-relaxed font-medium">
+                      {item.desc}
+                    </div>
                   </motion.div>
                 ))}
               </div>
