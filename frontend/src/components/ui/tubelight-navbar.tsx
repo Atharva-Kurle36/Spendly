@@ -67,7 +67,7 @@ export function NavBar({ items, className, isLoggedIn }: NavBarProps) {
                 className
             )}
         >
-            <div className="flex items-center gap-2 md:gap-3 bg-[--nav-bg] border border-[--nav-border] backdrop-blur-lg py-1 px-1 rounded-full shadow-lg">
+            <div className="flex items-center gap-2 md:gap-3 bg-white/70 border border-black/5 backdrop-blur-2xl py-1 px-1 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
                 {items.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.name;
@@ -99,7 +99,7 @@ export function NavBar({ items, className, isLoggedIn }: NavBarProps) {
                             }}
                             className={cn(
                                 "group relative cursor-pointer text-sm font-semibold px-4 md:px-6 py-2 md:py-2.5 rounded-full transition-colors",
-                                "text-[--nav-text] opacity-80 hover:opacity-100",
+                                "text-ink opacity-70 hover:opacity-100",
                                 isActive && "opacity-100 text-mint"
                             )}
                         >

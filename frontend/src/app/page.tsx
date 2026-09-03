@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import WalletScrollReveal from '@/components/landing/WalletScrollReveal';
+import Auralis from '@/components/ui/auralis';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,192 +27,60 @@ const staggerContainer = {
 };
 
 export default function LandingPage() {
-  const [demoInput, setDemoInput] = useState('');
-  const [demoStage, setDemoStage] = useState(0);
-
-  const handleDemoSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (demoInput.toLowerCase().includes('420') || demoInput.toLowerCase().includes('swiggy')) {
-      setDemoStage(1);
-      setTimeout(() => setDemoStage(2), 1500);
-      setTimeout(() => setDemoStage(3), 3000);
-    } else if (demoInput.trim() !== '') {
-      setDemoStage(1);
-      setTimeout(() => {
-        setDemoInput('');
-        setDemoStage(0);
-      }, 4000);
-    }
-  };
-
-  const resetDemo = () => {
-    setDemoInput('');
-    setDemoStage(0);
-  };
 
   return (
     <div className="landing-page min-h-screen bg-paper text-ink font-body selection:bg-mint selection:text-white">
       {/* Header for Landing Page */}
-      <header className="absolute top-0 left-0 right-0 p-5 px-8 flex justify-between items-center z-[90]">
+      <header className="absolute top-0 left-0 right-0 p-5 px-8 flex justify-between items-center z-[90] text-white">
         <Link href="/" className="font-display font-bold text-xl tracking-tight flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 bg-gradient-to-br from-mint to-deepmint rounded-xl flex items-center justify-center shadow-lg shadow-mint/20">
+          <div className="w-9 h-9 bg-gradient-to-br from-mint to-mint/80 rounded-xl flex items-center justify-center shadow-lg shadow-mint/20">
             <BrainCircuit className="w-5 h-5 text-white" />
           </div>
           Spendly
         </Link>
         <div>
-          <Link href="/auth" className="bg-gradient-to-r from-ink to-ink/90 text-paper px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-ink/20 transition-all hover:-translate-y-0.5 font-semibold text-sm">
+          <Link href="/auth" className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-2.5 rounded-xl hover:bg-white/20 transition-all hover:-translate-y-0.5 font-semibold text-sm">
             Enter App
           </Link>
         </div>
       </header>
       {/* Hero Section */}
-      <main className="pt-36 pb-20 px-6 max-w-7xl mx-auto">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="text-center max-w-4xl mx-auto mb-20 space-y-8"
-        >
-          <motion.div variants={fadeUp} custom={0}>
-            <span className="inline-flex items-center gap-2 bg-mint/10 text-deepmint px-4 py-2 rounded-full text-sm font-semibold tracking-wide">
-              <Sparkles className="w-4 h-4" />
-              AI-Powered Financial Intelligence
-            </span>
+      <div className="relative w-full overflow-hidden">
+        <Auralis height="100%" className="relative w-full pt-36 pb-20 px-6 bg-transparent">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="text-center max-w-4xl mx-auto mb-20 space-y-8 w-full"
+          >
+            <motion.div variants={fadeUp} custom={0}>
+              <span className="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-white/90 px-4 py-2 rounded-full text-sm font-semibold tracking-wide backdrop-blur-md">
+                <Sparkles className="w-4 h-4 text-mint" />
+                AI-Powered Financial Intelligence
+              </span>
+            </motion.div>
+            <motion.h1 variants={fadeUp} custom={1} className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05] text-white">
+              YOUR MONEY <br />
+              <span className="bg-gradient-to-r from-mint to-mint/80 bg-clip-text text-transparent drop-shadow-md">SHOULD EXPLAIN ITSELF.</span>
+            </motion.h1>
+            <motion.p variants={fadeUp} custom={2} className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
+              Traditional expense trackers just show you history. Spendly actively analyzes your behavior, detects spending leaks, and predicts financial impacts <span className="font-semibold text-white">before they happen.</span>
+            </motion.p>
+            <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
+              <Link href="/auth" className="group bg-mint text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-mint/30 transition-all hover:-translate-y-1 flex items-center gap-3">
+                Get Started Free
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <a href="#how-it-works" className="group text-white/70 hover:text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-colors flex items-center gap-2 border border-white/20 hover:border-white/40 hover:bg-white/10 backdrop-blur-sm">
+                Watch Demo
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </a>
+            </motion.div>
           </motion.div>
-          <motion.h1 variants={fadeUp} custom={1} className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05]">
-            YOUR MONEY <br />
-            <span className="bg-gradient-to-r from-mint to-deepmint bg-clip-text text-transparent">SHOULD EXPLAIN ITSELF.</span>
-          </motion.h1>
-          <motion.p variants={fadeUp} custom={2} className="text-lg md:text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
-            Traditional expense trackers just show you history. Spendly actively analyzes your behavior, detects spending leaks, and predicts financial impacts <span className="font-semibold text-ink/80">before they happen.</span>
-          </motion.p>
-          <motion.div variants={fadeUp} custom={3} className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
-            <Link href="/auth" className="group bg-gradient-to-r from-mint to-deepmint text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-mint/30 transition-all hover:-translate-y-1 flex items-center gap-3">
-              Get Started Free
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <a href="#demo" className="group text-ink/70 hover:text-ink px-8 py-4 rounded-2xl font-semibold text-lg transition-colors flex items-center gap-2 border border-ink/10 hover:border-ink/20 hover:bg-ink/5">
-              Watch Demo
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </motion.div>
-        </motion.div>
+        </Auralis>
+      </div>
 
-        {/* Trust Badges */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-wrap justify-center gap-8 mb-24 text-ink/40 text-sm"
-        >
-          <div className="flex items-center gap-2"><Lock className="w-4 h-4" /> Bank-Grade Encryption</div>
-          <div className="flex items-center gap-2"><Globe className="w-4 h-4" /> Works with Any Bank</div>
-          <div className="flex items-center gap-2"><Zap className="w-4 h-4" /> Real-time Analysis</div>
-          <div className="flex items-center gap-2"><ShieldAlert className="w-4 h-4" /> Privacy First</div>
-        </motion.div>
-
-        {/* Interactive Demo Section */}
-        <div id="demo" className="max-w-2xl mx-auto bg-white rounded-3xl shadow-[0_20px_60px_rgb(0,0,0,0.06)] border border-ink/5 p-8 md:p-10 relative overflow-hidden mb-32">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-mint via-deepmint to-mint" />
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-sm font-bold text-ink/40 uppercase tracking-widest">Live AI Pipeline Demo</div>
-            {demoStage > 0 && (
-              <button onClick={resetDemo} className="text-xs text-mint hover:text-deepmint font-semibold transition-colors">Reset Demo</button>
-            )}
-          </div>
-
-          <form onSubmit={handleDemoSubmit} className="relative">
-            <input
-              type="text"
-              placeholder="Try: ₹420 Swiggy dinner"
-              value={demoInput}
-              onChange={(e) => setDemoInput(e.target.value)}
-              className="w-full bg-paper border border-ink/10 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-mint/50 focus:border-mint/30 transition-all"
-              disabled={demoStage > 0}
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-ink to-ink/90 text-paper px-6 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-              disabled={demoStage > 0}
-            >
-              Analyze <ArrowRight className="w-4 h-4" />
-            </button>
-          </form>
-
-          <AnimatePresence>
-            {demoStage >= 1 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-6 pt-6 border-t border-ink/5 flex gap-4"
-              >
-                <div className="flex-1 bg-paper rounded-xl p-4">
-                  <div className="text-xs text-ink/50 uppercase mb-1">Extracted Merchant</div>
-                  <div className="font-semibold text-lg">Swiggy</div>
-                </div>
-                <div className="flex-1 bg-paper rounded-xl p-4">
-                  <div className="text-xs text-ink/50 uppercase mb-1">Category</div>
-                  <div className="font-semibold text-lg">Food & Dining</div>
-                </div>
-                <div className="flex-1 bg-paper rounded-xl p-4">
-                  <div className="text-xs text-ink/50 uppercase mb-1">Amount</div>
-                  <div className="font-display font-bold text-lg">₹420.00</div>
-                </div>
-              </motion.div>
-            )}
-
-            {demoStage >= 2 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 bg-deepmint/5 border border-deepmint/20 rounded-xl p-5 overflow-hidden"
-              >
-                <div className="flex justify-between items-end mb-2">
-                  <div>
-                    <div className="text-xs font-bold text-deepmint uppercase tracking-wider mb-1">Budget Impact</div>
-                    <div className="text-sm text-deepmint/80">Food & Dining • ₹7,000 monthly limit</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-display font-bold text-deepmint">82% Used</div>
-                    <div className="text-xs opacity-70 text-deepmint/80">₹5,820 spent</div>
-                  </div>
-                </div>
-                <div className="w-full bg-deepmint/10 h-2.5 rounded-full overflow-hidden mt-3">
-                  <motion.div
-                    initial={{ width: '76%' }}
-                    animate={{ width: '82%' }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-gradient-to-r from-deepmint to-mint h-full rounded-full"
-                  />
-                </div>
-              </motion.div>
-            )}
-
-            {demoStage >= 3 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-4 bg-amber/10 border border-amber/20 rounded-xl p-5 flex gap-4 items-start"
-              >
-                <div className="bg-white p-2.5 rounded-full shadow-sm shrink-0 mt-0.5">
-                  <Sparkles className="w-5 h-5 text-amber" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-amber-900 mb-1">AI Observation: Accelerated Spending</h4>
-                  <p className="text-sm text-amber-900/80 leading-relaxed mb-3">
-                    You're spending 18% faster than your normal pace. At this rate, you'll exceed your Food & Dining budget in 5 days.
-                  </p>
-                  <button className="text-sm bg-white border border-amber/20 px-4 py-2 rounded-lg font-medium text-amber-900 hover:bg-amber/5 transition-colors">
-                    Set ₹310 weekly limit
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        {/* Interactive Demo Section End */}
-
+      <main className="px-6 max-w-7xl mx-auto">
         {/* Wallet Scrollytelling Section */}
         <section id="how-it-works" className="-mx-6 md:mx-auto">
           <WalletScrollReveal />
