@@ -3,6 +3,7 @@
 import { Sparkles, TrendingUp, TrendingDown, ArrowRight, Wallet, PieChart, Activity } from "lucide-react";
 import { useEffect, useState } from "react";
 import { API_CONFIG } from "@/config";
+import { api } from "@/lib/api-client";
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -14,11 +15,8 @@ export default function OverviewPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch(`${API_CONFIG.baseUrl}/overview`);
-        const json = await res.json();
-        if (json.success) {
-          setData(json.data);
-        }
+        const result = await api.get('/overview');
+        setData(result);
       } catch (err) {
         console.error("Failed to load overview data:", err);
       } finally {

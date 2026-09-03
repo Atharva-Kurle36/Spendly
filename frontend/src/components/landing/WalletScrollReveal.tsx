@@ -172,9 +172,9 @@ export default function WalletScrollReveal({ className }: { className?: string }
                     {/* Debit Card (Lowest Layer) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-[#ffffff20] p-3 flex flex-col justify-between overflow-hidden",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff20] p-3 flex flex-col justify-between overflow-hidden",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showDebit ? "top-[-60px] opacity-100 rotate-[-4deg]" : "top-2 opacity-0 rotate-0"
+                            showDebit ? "top-[-60px] rotate-[-4deg]" : "top-[75px] rotate-0"
                         )}
                         style={{
                             background: "linear-gradient(120deg, #1e293b 0%, #0f172a 100%)",
@@ -211,9 +211,9 @@ export default function WalletScrollReveal({ className }: { className?: string }
                     {/* Credit Card (Middle Layer) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-[#ffffff30] p-3 flex flex-col justify-between overflow-hidden",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff30] p-3 flex flex-col justify-between overflow-hidden",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCredit ? "top-[-30px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
+                            showCredit ? "top-[-30px] rotate-[2deg]" : "top-[75px] rotate-0"
                         )}
                         style={{
                             background: "radial-gradient(circle at 100% 0%, #612231 0%, #1a080d 100%)",
@@ -246,7 +246,7 @@ export default function WalletScrollReveal({ className }: { className?: string }
                         className={cn(
                             "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15] overflow-visible",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCash ? "top-[10px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
+                            showCash ? "top-[10px] rotate-[-2deg]" : "top-[75px] rotate-0"
                         )}
                         style={{
                             transform: "translateZ(30px)"
@@ -283,21 +283,78 @@ export default function WalletScrollReveal({ className }: { className?: string }
                         </div>
                     </div>
 
-                    {/* Wallet front flap (Matte Black Leather with Stitching effect) */}
+                    {/* Inner Pocket (Hides the cards when they are retracted) */}
+                    <div
+                        className="absolute bottom-0 left-0 right-0 h-[115px] rounded-b-2xl rounded-t-lg border border-[#ffffff10] border-b-0 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]"
+                        style={{
+                            background: "linear-gradient(180deg, #1f1f1f 0%, #0a0a0a 100%)",
+                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), inset 0 0 0 1px #000, 0 -10px 20px rgba(0,0,0,0.5)",
+                            transform: "translateZ(35px)"
+                        }}
+                    >
+                        {/* Pocket Stitching */}
+                        <div className="absolute inset-1.5 border-b-0 border border-dashed border-[#ffffff0a] rounded-t-md pointer-events-none" />
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-b from-black/40 to-transparent rounded-t-lg" />
+                    </div>
+
+                    {/* Wallet front flap Container (3D for front and back faces) */}
                     <div
                         className={cn(
-                            "absolute inset-0 rounded-2xl shadow-2xl origin-bottom transition-all duration-[900ms] ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15] flex items-end justify-center pb-2",
+                            "absolute inset-0 origin-bottom transition-all duration-[1100ms] ease-[cubic-bezier(0.34,1.1,0.64,1)]",
                             "motion-reduce:transition-opacity motion-reduce:transform-none"
                         )}
                         style={{
-                            background: "linear-gradient(180deg, #242424 0%, #111111 100%)",
-                            boxShadow: "inset 0 0 0 1px #000, inset 0 0 0 3px #1f1f1f",
+                            transformStyle: "preserve-3d",
                             transform: isOpen ? "translateZ(40px) rotateX(-125deg)" : "translateZ(40px) rotateX(0deg)",
-                            opacity: isOpen ? 0.95 : 1
+                            opacity: isOpen ? 0.98 : 1
                         }}
                     >
-                        {/* Clasp (Metallic snap button) */}
-                        <div className="w-16 h-3 rounded-full bg-gradient-to-b from-[#666] to-[#222] border border-[#000] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_5px_rgba(0,0,0,0.6)]" />
+                        {/* Flap Front Face (Outside) */}
+                        <div
+                            className="absolute inset-0 rounded-2xl shadow-2xl flex flex-col items-center pb-2 pt-8 overflow-hidden [backface-visibility:hidden]"
+                            style={{
+                                background: "linear-gradient(180deg, #282828 0%, #151515 100%)",
+                                boxShadow: "inset 0 0 0 1px #000, inset 0 0 0 4px #1f1f1f, 0 10px 20px rgba(0,0,0,0.5)"
+                            }}
+                        >
+                            {/* Leather Stitching */}
+                            <div className="absolute inset-2 border border-dashed border-[#ffffff20] rounded-xl pointer-events-none" />
+                            
+                            {/* Embossed Brand Name (Gold Foil effect) */}
+                            <div className="flex flex-col items-center justify-center opacity-90 mt-2">
+                                <span className="font-display font-black tracking-[0.2em] text-[#d4af37] text-2xl select-none drop-shadow-sm" style={{ textShadow: "0px 1px 2px rgba(255,255,255,0.2), 0px -1px 1px rgba(0,0,0,0.8)" }}>
+                                    WALLET
+                                </span>
+                                <div className="w-12 h-[1px] bg-black/60 my-1 shadow-[0_1px_0_rgba(212,175,55,0.3)]" />
+                                <span className="font-sans font-bold tracking-[0.3em] text-[#d4af37] text-[8px] uppercase select-none drop-shadow-sm" style={{ textShadow: "0px 1px 1px rgba(255,255,255,0.1), 0px -1px 1px rgba(0,0,0,0.8)" }}>
+                                    Spendly
+                                </span>
+                            </div>
+
+                            {/* Clasp (Metallic snap button) */}
+                            <div className="w-14 h-4 rounded-full bg-gradient-to-b from-[#777] to-[#222] border border-[#000] shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),0_4px_6px_rgba(0,0,0,0.8)] mt-auto flex items-center justify-center">
+                                <div className="w-10 h-1.5 rounded-full bg-gradient-to-b from-[#111] to-[#333] shadow-[inset_0_1px_1px_rgba(0,0,0,1)]" />
+                            </div>
+                        </div>
+
+                        {/* Flap Back Face (Inside) */}
+                        <div
+                            className="absolute inset-0 rounded-2xl flex flex-col items-center pt-4 [backface-visibility:hidden]"
+                            style={{
+                                transform: "rotateX(180deg)",
+                                background: "linear-gradient(180deg, #181818 0%, #0d0d0d 100%)",
+                                boxShadow: "inset 0 0 0 1px #000, inset 0 20px 30px rgba(0,0,0,0.5)"
+                            }}
+                        >
+                            {/* Inside Stitching */}
+                            <div className="absolute inset-2 border border-dashed border-[#ffffff0a] rounded-xl pointer-events-none" />
+                            
+                            {/* Suede/Soft leather inner texture hint */}
+                            <div className="absolute inset-3 bg-[#00000020] rounded-lg blur-sm pointer-events-none" />
+                            
+                            {/* Inner Clasp Mechanism */}
+                            <div className="w-10 h-3 rounded-full bg-[#0a0a0a] shadow-[inset_0_2px_4px_rgba(0,0,0,1),0_1px_0_rgba(255,255,255,0.05)] border border-[#111]" />
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,62 +1,100 @@
 export class LLMProvider {
-  private apiKey: string;
+  private openRouterKey?: string;
+  private geminiKey?: string;
   
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
+  constructor(openRouterKey?: string, geminiKey?: string) {
+    this.openRouterKey = openRouterKey;
+    this.geminiKey = geminiKey;
   }
 
-  async generateInsight(transactions: any[], budgets: any[]): Promise<any> {
-    const prompt = `
-You are an expert AI financial awareness assistant for the SmartWallet AI app.
-Your goal is to analyze the user's recent transactions and budget context and provide a structured, highly detailed financial insight.
-Pay special attention to WHERE the user spends the most money. 
-Identify their top spending categories and provide specific, actionable suggestions on how they can reduce expenditure.
-If many transactions are uncategorized, highlight the need to categorize them.
+  private async callGemini(prompt: string, maxTokens: number): Promise<string> {
+    if (!this.geminiKey) {
+      throw new Error("No Gemini API key configured");
+    }
 
-You must ONLY output JSON in the following format:
-{
-  "type": "string (e.g., Spending Leak, Budget Overrun, Unusual Activity, Optimization)",
-  "severity": "low|medium|high",
-  "title": "string (e.g., High Dining Expenses, Uncategorized Spending)",
-  "description": "string (A detailed 2-3 sentence paragraph explaining where they spend the most money and exactly what is happening)",
-  "evidence": "string (Specific data points backing up your claim)",
-  "impact": "string (How this affects their overall financial health)",
-  "recommendation": "string (Concrete, actionable advice on how to cut back or optimize)",
-  "action_type": "string (A short action button label, e.g., 'Review Dining', 'Categorize Transactions', 'Adjust Budget')"
-}
+    const model = "gemini-3.5-flash-lite";
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          responseMimeType: "application/json"
+        }
+      })
+    });
 
-Do NOT output anything other than this JSON. Do NOT wrap it in markdown block quotes.
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Google Gemini API error: ${response.statusText} - ${errText}`);
+    }
 
-Transactions Context:
-${JSON.stringify(transactions, null, 2)}
+    const data: any = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  }
 
-Budgets Context:
-${JSON.stringify(budgets, null, 2)}
-    `;
+  private async callOpenRouter(prompt: string, maxTokens: number): Promise<string> {
+    if (!this.openRouterKey) {
+      throw new Error("No OpenRouter API key configured");
+    }
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${this.openRouterKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://smartwallet.app", 
+        "X-Title": "SmartWallet AI" 
       },
       body: JSON.stringify({
-        model: "openrouter/auto", // Or specific free model if preferred
+        model: "google/gemini-2.5-flash", 
+        max_tokens: maxTokens,
         messages: [
-          { role: "system", content: "You are a specialized AI assistant that only outputs JSON for the SmartWallet AI application." },
+          { role: "system", content: "You output strict JSON only." },
           { role: "user", content: prompt }
         ]
       })
     });
 
     if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.statusText}`);
+      const errText = await response.text();
+      throw new Error(`OpenRouter API error: ${response.statusText} - ${errText}`);
     }
 
     const data: any = await response.json();
-    let content = data.choices[0].message.content;
+    return data.choices[0].message.content;
+  }
+
+  async generateInsight(transactions: any[], budgets: any[]): Promise<any> {
+    const prompt = `You are a financial AI. Analyze transactions and budgets. Output strict JSON only:
+{"type":"Spending Leak|Budget Overrun|Optimization","severity":"low|medium|high","title":"string","description":"2 sentences on where money is spent most","evidence":"string","impact":"string","recommendation":"string","action_type":"string"}
+
+Transactions:${JSON.stringify(transactions)}
+Budgets:${JSON.stringify(budgets)}`;
+
+    let content = "";
     
-    // Clean up potential markdown formatting that some models ignore instructions to omit
+    // Prioritize Google Gemini AI Studio (fast, free/cost-effective, reliable)
+    if (this.geminiKey) {
+      try {
+        content = await this.callGemini(prompt, 600);
+      } catch (geminiError) {
+        console.warn("Gemini AI Studio failed, falling back to OpenRouter...", geminiError);
+        if (this.openRouterKey) {
+          content = await this.callOpenRouter(prompt, 600);
+        } else {
+          throw geminiError;
+        }
+      }
+    } else if (this.openRouterKey) {
+      content = await this.callOpenRouter(prompt, 600);
+    } else {
+      throw new Error("No AI provider key configured");
+    }
+    
     content = content.replace(/```json/g, "").replace(/```/g, "").trim();
     
     try {
@@ -66,71 +104,34 @@ ${JSON.stringify(budgets, null, 2)}
       throw new Error("Invalid JSON response from LLM");
     }
   }
-  async parseStatementText(text: string): Promise<any> {
-    const prompt = `
-You are a highly accurate financial data extraction assistant.
-I will provide you with the raw extracted text from a bank statement PDF.
-Your task is to extract the transactions, detect recurring bills, recommend budgets, and generate a primary insight.
-Return a strict JSON object. Do NOT include anything else, NO markdown wrapper, JUST the JSON object.
 
-Required format:
-{
-  "transactions": [
-    {
-      "date": "YYYY-MM-DD",
-      "merchant": "Name of the entity",
-      "amount": 120.50,
-      "type": "debit|credit",
-      "category_name": "Food & Dining | Transport | Shopping | Bills & Utilities | Entertainment | Health & Wellness | General"
-    }
-  ],
-  "bills": [
-    {
-      "merchant": "Netflix",
-      "amount": 649,
-      "due_date": "YYYY-MM-DD"
-    }
-  ],
-  "budgets": [
-    {
-      "category_name": "Food & Dining",
-      "limit_amount": 10000
-    }
-  ],
-  "insight": {
-    "title": "High Dining Expenses",
-    "description": "You spent heavily on food this month. Try cooking at home to save up.",
-    "action_type": "Review Dining"
-  }
-}
+  async parseStatementText(text: string): Promise<any> {
+    const prompt = `Extract financial data from text into strict JSON:
+{"transactions":[{"date":"YYYY-MM-DD","merchant":"string","amount":number,"type":"debit|credit","category_name":"Food & Dining|Transport|Shopping|Bills & Utilities|Entertainment|Health & Wellness|General"}],"bills":[{"merchant":"string","amount":number,"due_date":"YYYY-MM-DD"}],"budgets":[{"category_name":"string","limit_amount":number}],"insight":{"title":"string","description":"string","action_type":"string"}}
 
 Text:
-${text}
-    `;
+${text}`;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "openrouter/auto", 
-        messages: [
-          { role: "system", content: "You are a specialized AI assistant that only outputs JSON objects for the SmartWallet AI application." },
-          { role: "user", content: prompt }
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.statusText}`);
-    }
-
-    const data: any = await response.json();
-    let content = data.choices[0].message.content;
+    let content = "";
     
-    // Clean up potential markdown formatting that some models ignore instructions to omit
+    // Prioritize Google Gemini AI Studio (fast, free/cost-effective, reliable)
+    if (this.geminiKey) {
+      try {
+        content = await this.callGemini(prompt, 2000);
+      } catch (geminiError) {
+        console.warn("Gemini AI Studio failed, falling back to OpenRouter...", geminiError);
+        if (this.openRouterKey) {
+          content = await this.callOpenRouter(prompt, 2000);
+        } else {
+          throw geminiError;
+        }
+      }
+    } else if (this.openRouterKey) {
+      content = await this.callOpenRouter(prompt, 2000);
+    } else {
+      throw new Error("No AI provider key configured");
+    }
+    
     content = content.replace(/```json/g, "").replace(/```/g, "").trim();
 
     try {

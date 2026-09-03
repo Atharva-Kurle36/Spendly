@@ -1,7 +1,12 @@
 import { API_CONFIG } from '@/config';
 
 class ApiClient {
-  private getToken: (() => Promise<string | null>) | null = null;
+  private getToken: (() => Promise<string | null>) | null = async () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('smartwallet-token');
+    }
+    return null;
+  };
 
   setTokenProvider(provider: () => Promise<string | null>) {
     this.getToken = provider;
@@ -24,6 +29,17 @@ class ApiClient {
     });
 
     const data = await response.json();
+    
+    // Automatically handle 401 Unauthorized errors by clearing session and redirecting
+    if (response.status === 401 || data.error?.code === 'UNAUTHORIZED') {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('smartwallet-token');
+        localStorage.removeItem('smartwallet-session');
+        window.location.href = '/auth';
+      }
+      throw new Error('Session expired. Please log in again.');
+    }
+    
     if (!response.ok || !data.success) {
       throw new Error(data?.error?.message || 'API request failed');
     }
@@ -34,6 +50,31 @@ class ApiClient {
   // Auth sync
   syncUser() {
     return this.fetchWithAuth(API_CONFIG.endpoints.users.sync, { method: 'POST' });
+  }
+
+  // Generic HTTP Methods
+  get(endpoint: string, options: RequestInit = {}) {
+    return this.fetchWithAuth(endpoint, { ...options, method: 'GET' });
+  }
+
+  post(endpoint: string, body?: any, options: RequestInit = {}) {
+    return this.fetchWithAuth(endpoint, {
+      ...options,
+      method: 'POST',
+      body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+    });
+  }
+
+  put(endpoint: string, body?: any, options: RequestInit = {}) {
+    return this.fetchWithAuth(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+    });
+  }
+
+  delete(endpoint: string, options: RequestInit = {}) {
+    return this.fetchWithAuth(endpoint, { ...options, method: 'DELETE' });
   }
 
   // Expenses

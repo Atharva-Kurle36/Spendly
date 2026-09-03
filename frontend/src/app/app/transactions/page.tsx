@@ -7,7 +7,7 @@ import { API_CONFIG } from '@/config';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 const IconMap: Record<string, React.ReactNode> = {
   'Utensils': <Utensils className="w-6 h-6" />,
@@ -33,11 +33,8 @@ export default function TransactionsPage() {
 
   const fetchTransactions = async () => {
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/transactions`);
-      const json = await res.json();
-      if (json.success) {
-        setTransactions(json.data);
-      }
+      const data = await api.get('/transactions');
+      setTransactions(data || []);
     } catch (err) {
       console.error("Failed to load transactions:", err);
     } finally {
@@ -52,7 +49,7 @@ export default function TransactionsPage() {
   const handleClearData = async () => {
     if (!confirm("Are you sure you want to wipe all transactions? This is for testing purposes.")) return;
     try {
-      await fetch(`${API_CONFIG.baseUrl}/transactions`, { method: 'DELETE' });
+      await api.delete('/transactions');
       setTransactions([]);
       alert("All transactions wiped successfully!");
     } catch (err) {
@@ -93,31 +90,23 @@ export default function TransactionsPage() {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout for AI processing
 
-      const res = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.transactions.import}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          filename: selectedFile.name, 
-          text: extractedText,
-          income: income ? Number(income) : undefined
-        }),
-        signal: controller.signal
-      });
+      const data = await api.post(API_CONFIG.endpoints.transactions.import, { 
+        filename: selectedFile.name, 
+        text: extractedText,
+        income: income ? Number(income) : undefined
+      }, { signal: controller.signal });
       
       clearTimeout(timeoutId);
       
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message);
-      
-      alert(data.data.message);
+      alert(data?.message || 'Successfully analyzed and imported transactions via AI.');
       setSelectedFile(null);
       setIncome('');
       fetchTransactions(); // Reload after upload
-    } catch (err) {
-      console.error(err);
-      alert('Failed to analyze and import statement');
+    } catch (err: any) {
+      console.error('Import statement error:', err);
+      alert(err?.message || 'Failed to analyze and import statement');
     } finally {
       clearInterval(progressInterval);
       setProgress(100);
@@ -134,23 +123,17 @@ export default function TransactionsPage() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/transactions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          merchant: newTransaction.merchant, 
-          amount: Number(newTransaction.amount), 
-          category_id: newTransaction.category_id 
-        })
+      await api.post('/transactions', { 
+        merchant: newTransaction.merchant, 
+        amount: Number(newTransaction.amount), 
+        category_id: newTransaction.category_id 
       });
-      const data = await res.json();
-      if (!data.success) throw new Error("Failed");
       
       setIsManualModalOpen(false);
       setNewTransaction({ merchant: '', amount: '', category_id: 'cat_food' });
       fetchTransactions();
-    } catch (err) {
-      alert('Failed to add transaction.');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to add transaction.');
     } finally {
       setIsSubmitting(false);
     }
@@ -275,10 +258,10 @@ export default function TransactionsPage() {
             
             <div className="p-6 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-ink/70 mb-2">Statement File (PDF)</label>
+                <label className="block text-sm font-medium text-ink/70 mb-2">Statement File (PDF or CSV)</label>
                 <input 
                   type="file" 
-                  accept=".pdf"
+                  accept=".pdf,.csv"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   className="w-full border border-ink/10 rounded-lg p-2 focus:outline-none focus:border-mint"
                 />

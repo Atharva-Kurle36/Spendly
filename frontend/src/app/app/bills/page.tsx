@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ShieldAlert, Plus, Calendar, AlertCircle, X } from 'lucide-react';
 import { API_CONFIG } from '@/config';
+import { api } from '@/lib/api-client';
 
 export default function BillsPage() {
   const [bills, setBills] = useState<any[]>([]);
@@ -15,10 +16,9 @@ export default function BillsPage() {
   useEffect(() => {
     async function fetchBills() {
       try {
-        const res = await fetch(`${API_CONFIG.baseUrl}/bills`);
-        const json = await res.json();
-        if (json.success) {
-          setBills(json.data);
+        const res = await api.get('/bills');
+        if (res.success) {
+          setBills(res.data);
         }
       } catch (err) {
         console.error("Failed to fetch bills:", err);
@@ -31,9 +31,8 @@ export default function BillsPage() {
 
   const fetchBills = async () => {
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/bills`);
-      const json = await res.json();
-      if (json.success) setBills(json.data);
+      const res = await api.get('/bills');
+      if (res.success) setBills(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -45,17 +44,12 @@ export default function BillsPage() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/bills`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          merchant: newBill.merchant, 
-          amount: Number(newBill.amount), 
-          due_date: new Date(newBill.due_date).toISOString(),
-          is_recurring: newBill.is_recurring 
-        })
+      const data = await api.post('/bills', { 
+        merchant: newBill.merchant, 
+        amount: Number(newBill.amount), 
+        due_date: new Date(newBill.due_date).toISOString(),
+        is_recurring: newBill.is_recurring 
       });
-      const data = await res.json();
       if (!data.success) throw new Error("Failed");
       
       setIsModalOpen(false);

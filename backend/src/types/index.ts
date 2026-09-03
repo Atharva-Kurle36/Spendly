@@ -2,12 +2,15 @@ export interface Env {
   DB: D1Database;
   RECEIPTS_BUCKET: R2Bucket;
   OPENROUTER_API_KEY: string;
+  GEMINI_API_KEY: string;
+  JWT_SECRET: string;
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
+  password_hash?: string;
   created_at: string;
   updated_at: string;
 }

@@ -27,4 +27,26 @@ export class UserRepository {
     const query = `SELECT * FROM users WHERE id = ?`;
     return await this.db.prepare(query).bind(id).first<User>();
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const query = `SELECT * FROM users WHERE email = ?`;
+    return await this.db.prepare(query).bind(email).first<User>();
+  }
+
+  async createUserWithPassword(id: string, email: string, name: string, passwordHash: string): Promise<User> {
+    const query = `
+      INSERT INTO users (id, email, name, password_hash)
+      VALUES (?, ?, ?, ?)
+      RETURNING *
+    `;
+    const result = await this.db.prepare(query).bind(
+      id,
+      email,
+      name,
+      passwordHash
+    ).first<User>();
+
+    if (!result) throw new Error("Failed to create user");
+    return result;
+  }
 }

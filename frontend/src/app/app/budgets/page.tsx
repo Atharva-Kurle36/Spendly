@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, TrendingUp, AlertCircle, CheckCircle2, AlertTriangle, X, Edit2, Trash2, Utensils, Car, ShoppingBag, Receipt, HelpCircle } from 'lucide-react';
 import { API_CONFIG } from '@/config';
+import { api } from '@/lib/api-client';
 
 const ICON_MAP: Record<string, any> = {
   'Utensils': Utensils,
@@ -33,12 +34,11 @@ export default function BudgetsPage() {
 
   const fetchBudgets = async () => {
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/budgets`);
-      const json = await res.json();
-      if (json.success) {
+      const res = await api.get('/budgets');
+      if (res.success) {
         // Deduplicate budgets by category to ensure only 1 card per category is shown
         const seen = new Set();
-        const uniqueBudgets = json.data.filter((b: any) => {
+        const uniqueBudgets = res.data.filter((b: any) => {
           const categoryName = b.name || 'Uncategorized';
           if (seen.has(categoryName)) return false;
           seen.add(categoryName);
@@ -79,10 +79,7 @@ export default function BudgetsPage() {
     if (!confirm('Are you sure you want to delete this budget?')) return;
     
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/budgets/${id}`, {
-        method: 'DELETE'
-      });
-      const data = await res.json();
+      const data = await api.delete(`/budgets/${id}`);
       if (data.success) {
         fetchBudgets();
       } else {
@@ -99,16 +96,13 @@ export default function BudgetsPage() {
     
     setIsSubmitting(true);
     try {
-      const url = modalMode === 'create' 
-        ? `${API_CONFIG.baseUrl}/budgets` 
-        : `${API_CONFIG.baseUrl}/budgets/${editBudgetId}`;
+      const endpoint = modalMode === 'create' ? '/budgets' : `/budgets/${editBudgetId}`;
+      const payload = { category_id: newBudget.category_id, amount: Number(newBudget.amount) };
+      
+      const data = modalMode === 'create' 
+        ? await api.post(endpoint, payload)
+        : await api.put(endpoint, payload);
         
-      const res = await fetch(url, {
-        method: modalMode === 'create' ? 'POST' : 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category_id: newBudget.category_id, amount: Number(newBudget.amount) })
-      });
-      const data = await res.json();
       if (!data.success) throw new Error("Failed");
       
       setIsModalOpen(false);

@@ -6,17 +6,20 @@ import { ExpenseRepository } from './repositories/expense.repository';
 import { UserRepository } from './repositories/user.repository';
 import { BudgetRepository } from './repositories/budget.repository';
 import { LLMProvider } from './ai/llm-provider';
+import { authRoutes } from './routes/auth';
 
 const app = new Hono<{ Bindings: Env; Variables: { user: any } }>();
 
 app.use('/*', cors({
-  origin: (origin) => origin,
+  origin: (origin) => origin || '*',
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
   credentials: true,
 }));
+
+app.route('/api/auth', authRoutes);
 
 // Root Health Check Route
 app.get('/', (c) => {
@@ -100,7 +103,7 @@ app.post('/api/transactions/import', authMiddleware, async (c) => {
     await c.env.RECEIPTS_BUCKET.put(objectKey, text);
 
     // 2. Parse using AI LLM
-    const llm = new LLMProvider(c.env.OPENROUTER_API_KEY);
+    const llm = new LLMProvider(c.env.OPENROUTER_API_KEY, c.env.GEMINI_API_KEY);
     const parsedPayload = await llm.parseStatementText(text);
     const parsedRows = parsedPayload.transactions || [];
     const parsedBills = parsedPayload.bills || [];
@@ -442,7 +445,7 @@ app.post('/api/insights/generate', authMiddleware, async (c) => {
       WHERE b.user_id = ?
     `).bind(user.id).all();
 
-    const llm = new LLMProvider(c.env.OPENROUTER_API_KEY);
+    const llm = new LLMProvider(c.env.OPENROUTER_API_KEY, c.env.GEMINI_API_KEY);
     const insight = await llm.generateInsight(expenses, budgets);
 
     await c.env.DB.prepare('INSERT INTO ai_insights (id, user_id, type, severity, title, description, evidence, recommendation, action_type, is_dismissed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')

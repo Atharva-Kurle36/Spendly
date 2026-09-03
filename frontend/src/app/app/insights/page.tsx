@@ -22,17 +22,14 @@ export default function InsightsPage() {
   const fetchInsights = async () => {
     try {
       const [insightsRes, goalsRes, overviewRes] = await Promise.all([
-        fetch(`${API_CONFIG.baseUrl}/insights`),
-        fetch(`${API_CONFIG.baseUrl}/goals`),
-        fetch(`${API_CONFIG.baseUrl}/overview`)
+        api.get('/insights'),
+        api.get('/goals'),
+        api.get('/overview')
       ]);
-      const insightsJson = await insightsRes.json();
-      const goalsJson = await goalsRes.json();
-      const overviewJson = await overviewRes.json();
       
-      if (insightsJson.success) setInsights(insightsJson.data);
-      if (goalsJson.success) setGoals(goalsJson.data);
-      if (overviewJson.success) setOverview(overviewJson.data);
+      if (insightsRes.success) setInsights(insightsRes.data);
+      if (goalsRes.success) setGoals(goalsRes.data);
+      if (overviewRes.success) setOverview(overviewRes.data);
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {
@@ -43,9 +40,8 @@ export default function InsightsPage() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/insights/generate`, { method: 'POST' });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || "Failed");
+      const data = await api.post('/insights/generate');
+      if (!data.success) throw new Error("Failed");
       await fetchInsights();
       
       setShowSuccess(true);

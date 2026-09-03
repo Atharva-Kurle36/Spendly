@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Target, Plus, TrendingUp, Trophy, X } from 'lucide-react';
 import { API_CONFIG } from '@/config';
+import { api } from '@/lib/api-client';
 
 export default function GoalsPage() {
   const [goals, setGoals] = useState<any[]>([]);
@@ -18,10 +19,9 @@ export default function GoalsPage() {
   useEffect(() => {
     async function fetchGoals() {
       try {
-        const res = await fetch(`${API_CONFIG.baseUrl}/goals`);
-        const json = await res.json();
-        if (json.success) {
-          setGoals(json.data);
+        const res = await api.get('/goals');
+        if (res.success) {
+          setGoals(res.data);
         }
       } catch (err) {
         console.error("Failed to fetch goals:", err);
@@ -34,9 +34,8 @@ export default function GoalsPage() {
 
   const fetchGoals = async () => {
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/goals`);
-      const json = await res.json();
-      if (json.success) setGoals(json.data);
+      const res = await api.get('/goals');
+      if (res.success) setGoals(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -48,17 +47,12 @@ export default function GoalsPage() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/goals`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: newGoal.name, 
-          target_amount: Number(newGoal.target_amount), 
-          monthly_contribution: Number(newGoal.monthly_contribution),
-          target_date: new Date(newGoal.target_date).toISOString(),
-        })
+      const data = await api.post('/goals', { 
+        name: newGoal.name, 
+        target_amount: Number(newGoal.target_amount), 
+        monthly_contribution: Number(newGoal.monthly_contribution),
+        target_date: new Date(newGoal.target_date).toISOString(),
       });
-      const data = await res.json();
       if (!data.success) throw new Error("Failed");
       
       setIsModalOpen(false);
@@ -77,12 +71,7 @@ export default function GoalsPage() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/goals/${selectedGoalId}/add-funds`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: Number(fundAmount) })
-      });
-      const data = await res.json();
+      const data = await api.post(`/goals/${selectedGoalId}/add-funds`, { amount: Number(fundAmount) });
       if (!data.success) throw new Error("Failed");
       
       setIsFundModalOpen(false);
