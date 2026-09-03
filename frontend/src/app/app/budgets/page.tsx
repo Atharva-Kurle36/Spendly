@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Plus, TrendingUp, AlertCircle, CheckCircle2, AlertTriangle, X, Edit2, Trash2, Utensils, Car, ShoppingBag, Receipt, HelpCircle } from 'lucide-react';
+import { Plus, TrendingUp, AlertCircle, CheckCircle2, AlertTriangle, X, Edit2, Trash2, Utensils, Car, ShoppingBag, Receipt, Tv, HeartPulse, Wallet, Zap, HelpCircle } from 'lucide-react';
 import { API_CONFIG } from '@/config';
 import { api } from '@/lib/api-client';
 
@@ -9,7 +9,11 @@ const ICON_MAP: Record<string, any> = {
   'Utensils': Utensils,
   'Car': Car,
   'ShoppingBag': ShoppingBag,
-  'Receipt': Receipt
+  'Receipt': Receipt,
+  'Tv': Tv,
+  'HeartPulse': HeartPulse,
+  'Wallet': Wallet,
+  'Zap': Zap
 };
 
 export default function BudgetsPage() {
@@ -35,19 +39,18 @@ export default function BudgetsPage() {
   const fetchBudgets = async () => {
     try {
       const res = await api.get('/budgets');
-      if (res.success) {
-        // Deduplicate budgets by category to ensure only 1 card per category is shown
-        const seen = new Set();
-        const uniqueBudgets = res.data.filter((b: any) => {
-          const categoryName = b.name || 'Uncategorized';
-          if (seen.has(categoryName)) return false;
-          seen.add(categoryName);
-          return true;
-        });
-        setBudgets(uniqueBudgets);
-      }
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      // Deduplicate budgets by category to ensure only 1 card per category is shown
+      const seen = new Set();
+      const uniqueBudgets = data.filter((b: any) => {
+        const categoryName = b.name || 'Uncategorized';
+        if (seen.has(categoryName)) return false;
+        seen.add(categoryName);
+        return true;
+      });
+      setBudgets(uniqueBudgets);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load budgets:", err);
     } finally {
       setLoading(false);
     }
@@ -63,12 +66,14 @@ export default function BudgetsPage() {
   const openEditModal = (budget: any) => {
     setModalMode('edit');
     setEditBudgetId(budget.id);
-    // Find category ID based on name or fallback
     let cat_id = 'cat_food';
     if (budget.name === 'Food & Dining') cat_id = 'cat_food';
     else if (budget.name === 'Shopping') cat_id = 'cat_shopping';
     else if (budget.name === 'Transport') cat_id = 'cat_transport';
     else if (budget.name === 'Bills & Utilities') cat_id = 'cat_bills';
+    else if (budget.name === 'Entertainment') cat_id = 'cat_entertainment';
+    else if (budget.name === 'Health & Wellness') cat_id = 'cat_health';
+    else if (budget.name === 'General & Others') cat_id = 'cat_general';
     
     setNewBudget({ category_id: cat_id, amount: (budget.limit_amount / 100).toString() });
     setIsModalOpen(true);
@@ -79,12 +84,8 @@ export default function BudgetsPage() {
     if (!confirm('Are you sure you want to delete this budget?')) return;
     
     try {
-      const data = await api.delete(`/budgets/${id}`);
-      if (data.success) {
-        fetchBudgets();
-      } else {
-        alert('Failed to delete budget.');
-      }
+      await api.delete(`/budgets/${id}`);
+      fetchBudgets();
     } catch (err) {
       alert('Error deleting budget.');
     }
@@ -99,16 +100,16 @@ export default function BudgetsPage() {
       const endpoint = modalMode === 'create' ? '/budgets' : `/budgets/${editBudgetId}`;
       const payload = { category_id: newBudget.category_id, amount: Number(newBudget.amount) };
       
-      const data = modalMode === 'create' 
-        ? await api.post(endpoint, payload)
-        : await api.put(endpoint, payload);
-        
-      if (!data.success) throw new Error("Failed");
+      if (modalMode === 'create') {
+        await api.post(endpoint, payload);
+      } else {
+        await api.put(endpoint, payload);
+      }
       
       setIsModalOpen(false);
       fetchBudgets();
-    } catch (err) {
-      alert(`Failed to ${modalMode} budget.`);
+    } catch (err: any) {
+      alert(err?.message || `Failed to ${modalMode} budget.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -273,6 +274,9 @@ export default function BudgetsPage() {
                   <option value="cat_shopping">Shopping</option>
                   <option value="cat_transport">Transport</option>
                   <option value="cat_bills">Bills & Utilities</option>
+                  <option value="cat_entertainment">Entertainment</option>
+                  <option value="cat_health">Health & Wellness</option>
+                  <option value="cat_general">General & Others</option>
                 </select>
               </div>
 

@@ -21,15 +21,15 @@ export default function InsightsPage() {
 
   const fetchInsights = async () => {
     try {
-      const [insightsRes, goalsRes, overviewRes] = await Promise.all([
+      const [insightsData, goalsData, overviewData] = await Promise.all([
         api.get('/insights'),
         api.get('/goals'),
         api.get('/overview')
       ]);
       
-      if (insightsRes.success) setInsights(insightsRes.data);
-      if (goalsRes.success) setGoals(goalsRes.data);
-      if (overviewRes.success) setOverview(overviewRes.data);
+      if (insightsData) setInsights(Array.isArray(insightsData) ? insightsData : (insightsData.data || []));
+      if (goalsData) setGoals(Array.isArray(goalsData) ? goalsData : (goalsData.data || []));
+      if (overviewData) setOverview(overviewData.data || overviewData);
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {
@@ -40,15 +40,14 @@ export default function InsightsPage() {
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const data = await api.post('/insights/generate');
-      if (!data.success) throw new Error("Failed");
+      await api.post('/insights/generate');
       await fetchInsights();
       
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 4000);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to generate insights. Ensure OpenRouter is configured and you have transactions.');
+      alert(err?.message || 'Failed to generate insights. Ensure you have transactions.');
     } finally {
       setIsGenerating(false);
     }

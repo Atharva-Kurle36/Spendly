@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Target, Plus, TrendingUp, Trophy, X } from 'lucide-react';
+import { Target, Plus, TrendingUp, Trophy, Trash2, X } from 'lucide-react';
 import { API_CONFIG } from '@/config';
 import { api } from '@/lib/api-client';
 
@@ -17,27 +17,18 @@ export default function GoalsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchGoals() {
-      try {
-        const res = await api.get('/goals');
-        if (res.success) {
-          setGoals(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch goals:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchGoals();
   }, []);
 
   const fetchGoals = async () => {
     try {
       const res = await api.get('/goals');
-      if (res.success) setGoals(res.data);
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      setGoals(data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch goals:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,19 +38,18 @@ export default function GoalsPage() {
     
     setIsSubmitting(true);
     try {
-      const data = await api.post('/goals', { 
+      await api.post('/goals', { 
         name: newGoal.name, 
         target_amount: Number(newGoal.target_amount), 
         monthly_contribution: Number(newGoal.monthly_contribution),
         target_date: new Date(newGoal.target_date).toISOString(),
       });
-      if (!data.success) throw new Error("Failed");
       
       setIsModalOpen(false);
       setNewGoal({ name: '', target_amount: '', monthly_contribution: '', target_date: '' });
       fetchGoals();
-    } catch (err) {
-      alert('Failed to create goal.');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to create goal.');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,16 +61,25 @@ export default function GoalsPage() {
     
     setIsSubmitting(true);
     try {
-      const data = await api.post(`/goals/${selectedGoalId}/add-funds`, { amount: Number(fundAmount) });
-      if (!data.success) throw new Error("Failed");
-      
+      await api.post(`/goals/${selectedGoalId}/add-funds`, { amount: Number(fundAmount) });
       setIsFundModalOpen(false);
       setFundAmount('');
       fetchGoals();
-    } catch (err) {
-      alert('Failed to add funds.');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to add funds.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteGoal = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this goal?")) return;
+    try {
+      await api.delete(`/goals/${id}`);
+      fetchGoals();
+    } catch (err) {
+      alert("Failed to delete goal.");
     }
   };
 
@@ -155,16 +154,25 @@ export default function GoalsPage() {
                   
                   <div className="flex justify-between items-center text-sm">
                     <span className={`font-medium ${isPrimary ? 'text-deepmint' : 'text-mint'}`}>{percent}% Completed</span>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedGoalId(goal.id);
-                        setIsFundModalOpen(true);
-                      }}
-                      className="text-mint font-bold hover:underline"
-                    >
-                      + Add Funds
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedGoalId(goal.id);
+                          setIsFundModalOpen(true);
+                        }}
+                        className="text-mint font-bold hover:underline"
+                      >
+                        + Add Funds
+                      </button>
+                      <button 
+                        onClick={(e) => handleDeleteGoal(goal.id, e)}
+                        className="text-ink/30 hover:text-coral p-1 rounded transition-colors"
+                        title="Delete Goal"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

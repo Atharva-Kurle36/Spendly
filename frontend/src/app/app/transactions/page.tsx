@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { UploadCloud, Search, Filter, Plus, FileText, Trash2, X, Utensils, ShoppingBag, Car, Zap } from 'lucide-react';
+import { UploadCloud, Search, Filter, Plus, FileText, Trash2, X, Utensils, ShoppingBag, Car, Zap, Receipt, Tv, HeartPulse, Wallet } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { API_CONFIG } from '@/config';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -13,7 +13,11 @@ const IconMap: Record<string, React.ReactNode> = {
   'Utensils': <Utensils className="w-6 h-6" />,
   'ShoppingBag': <ShoppingBag className="w-6 h-6" />,
   'Car': <Car className="w-6 h-6" />,
-  'Zap': <Zap className="w-6 h-6" />
+  'Zap': <Zap className="w-6 h-6" />,
+  'Receipt': <Receipt className="w-6 h-6" />,
+  'Tv': <Tv className="w-6 h-6" />,
+  'HeartPulse': <HeartPulse className="w-6 h-6" />,
+  'Wallet': <Wallet className="w-6 h-6" />
 };
 
 export default function TransactionsPage() {

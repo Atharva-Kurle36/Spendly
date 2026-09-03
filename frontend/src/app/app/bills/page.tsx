@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { ShieldAlert, Plus, Calendar, AlertCircle, X } from 'lucide-react';
+import { ShieldAlert, Plus, Calendar, AlertCircle, Trash2, X } from 'lucide-react';
 import { API_CONFIG } from '@/config';
 import { api } from '@/lib/api-client';
 
@@ -14,27 +14,18 @@ export default function BillsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function fetchBills() {
-      try {
-        const res = await api.get('/bills');
-        if (res.success) {
-          setBills(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch bills:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchBills();
   }, []);
 
   const fetchBills = async () => {
     try {
       const res = await api.get('/bills');
-      if (res.success) setBills(res.data);
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      setBills(data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch bills:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,21 +35,31 @@ export default function BillsPage() {
     
     setIsSubmitting(true);
     try {
-      const data = await api.post('/bills', { 
+      await api.post('/bills', { 
         merchant: newBill.merchant, 
         amount: Number(newBill.amount), 
         due_date: new Date(newBill.due_date).toISOString(),
         is_recurring: newBill.is_recurring 
       });
-      if (!data.success) throw new Error("Failed");
       
       setIsModalOpen(false);
       setNewBill({ merchant: '', amount: '', due_date: '', is_recurring: true });
       fetchBills();
-    } catch (err) {
-      alert('Failed to add bill.');
+    } catch (err: any) {
+      alert(err?.message || 'Failed to add bill.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteBill = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to remove this bill?")) return;
+    try {
+      await api.delete(`/bills/${id}`);
+      fetchBills();
+    } catch (err) {
+      alert("Failed to delete bill.");
     }
   };
 
@@ -73,19 +74,24 @@ export default function BillsPage() {
       <header className="flex justify-between items-end">
         <div>
           <h1 className="font-display text-3xl font-bold flex items-center gap-3">
-            <ShieldAlert className="w-8 h-8 text-coral" /> 
-            Bills & Subscriptions
+            Upcoming Bills <span className="bg-mint/10 text-mint text-sm px-3 py-1 rounded-full font-bold tracking-normal">Auto-Tracked</span>
           </h1>
-          <p className="text-ink/60 mt-1">Manage recurring expenses and avoid late fees.</p>
+          <p className="text-ink/60 mt-1">Never miss a recurring payment again.</p>
         </div>
-        <button onClick={() => setIsModalOpen(true)} className="bg-mint text-white px-5 py-2.5 rounded-lg font-medium hover:bg-deepmint transition-colors shadow-sm flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Bill
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-mint text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-deepmint transition-all shadow-sm shadow-mint/20"
+        >
+          <Plus className="w-5 h-5" /> Add Bill
         </button>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-ink/5 shadow-sm col-span-2">
-          <h3 className="font-bold text-lg mb-6">Upcoming in next 30 days</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-ink/5 shadow-sm space-y-6">
+          <div className="flex justify-between items-center pb-4 border-b border-ink/5">
+            <h3 className="font-bold text-lg">Next 30 Days</h3>
+            <span className="text-sm font-semibold text-ink/50">{bills.length} active bills</span>
+          </div>
           
           <div className="space-y-4">
             {loading ? (
@@ -113,7 +119,7 @@ export default function BillsPage() {
                   const isUrgent = daysUntilDue <= 5;
                   
                   return (
-                    <div key={bill.id} className="flex justify-between items-center p-4 bg-paper/30 rounded-xl border border-ink/5 hover:border-ink/10 transition-colors cursor-pointer">
+                    <div key={bill.id} className="flex justify-between items-center p-4 bg-paper/30 rounded-xl border border-ink/5 hover:border-ink/10 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isUrgent ? 'bg-coral/10 text-coral' : 'bg-ink/5 text-ink/40'}`}>
                           {isUrgent ? <AlertCircle className="w-6 h-6" /> : <Calendar className="w-6 h-6" />}
@@ -125,7 +131,16 @@ export default function BillsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="font-display font-bold text-xl">{formatCurrency(bill.amount)}</div>
+                      <div className="flex items-center gap-4">
+                        <div className="font-display font-bold text-xl">{formatCurrency(bill.amount)}</div>
+                        <button 
+                          onClick={(e) => handleDeleteBill(bill.id, e)}
+                          className="p-2 text-ink/30 hover:text-coral hover:bg-coral/10 rounded-lg transition-colors"
+                          title="Remove Bill"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}

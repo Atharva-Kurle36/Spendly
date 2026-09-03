@@ -21,10 +21,11 @@ authRoutes.post('/register', async (c) => {
     return c.json({ success: false, error: { message: 'Missing required fields' } }, 400);
   }
 
+  const cleanEmail = email.trim().toLowerCase();
   const userRepo = new UserRepository(c.env.DB);
   
   // Check if user already exists
-  const existingUser = await userRepo.findByEmail(email);
+  const existingUser = await userRepo.findByEmail(cleanEmail);
   if (existingUser) {
     return c.json({ success: false, error: { message: 'An account with this email already exists' } }, 400);
   }
@@ -33,8 +34,12 @@ authRoutes.post('/register', async (c) => {
   const passwordHash = await hashPassword(password);
   
   try {
-    const user = await userRepo.createUserWithPassword(id, email, name, passwordHash);
+    const user = await userRepo.createUserWithPassword(id, cleanEmail, name.trim(), passwordHash);
     
+    // Initialize default checking account
+    await c.env.DB.prepare('INSERT INTO accounts (id, user_id, name, type, balance) VALUES (?, ?, ?, ?, ?)')
+      .bind(`acc_${crypto.randomUUID()}`, user.id, 'Main Checking', 'checking', 0).run();
+
     // Generate JWT
     const token = await sign({
       sub: user.id,
@@ -59,8 +64,9 @@ authRoutes.post('/login', async (c) => {
     return c.json({ success: false, error: { message: 'Missing required fields' } }, 400);
   }
 
+  const cleanEmail = email.trim().toLowerCase();
   const userRepo = new UserRepository(c.env.DB);
-  const user = await userRepo.findByEmail(email);
+  const user = await userRepo.findByEmail(cleanEmail);
   
   if (!user || !user.password_hash) {
     return c.json({ success: false, error: { message: 'Invalid email or password' } }, 401);

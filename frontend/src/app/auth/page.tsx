@@ -19,7 +19,7 @@ export default function AuthPage() {
 
   useEffect(() => { if (!loading && user) router.replace("/app"); }, [loading, router, user]);
 
-  const submit = (event: React.FormEvent) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (mode === "register" && !name.trim()) return setFeedback({ type: "error", text: "Please enter your name." });
@@ -27,7 +27,11 @@ export default function AuthPage() {
     if (!gmailPattern.test(cleanEmail)) return setFeedback({ type: "error", text: "Please use a valid @gmail.com address." });
     if (!password) return setFeedback({ type: "error", text: "Please enter a password." });
     if (mode === "register" && password.length < 8) return setFeedback({ type: "error", text: "Password must be at least 8 characters." });
-    const result = mode === "login" ? login(cleanEmail, password) : register(name.trim(), cleanEmail, password);
+    
+    const result = mode === "login" 
+      ? await login(cleanEmail, password) 
+      : await register(name.trim(), cleanEmail, password);
+      
     setFeedback({ type: result.ok ? "success" : "error", text: result.message });
     if (result.ok) setTimeout(() => router.replace("/app"), 450);
   };
