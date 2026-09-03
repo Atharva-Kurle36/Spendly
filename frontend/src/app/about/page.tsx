@@ -1,64 +1,38 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowLeft, BrainCircuit } from 'lucide-react';
+import { ArrowRight, BrainCircuit, Eye, Gauge, Globe, LockKeyhole, Mail, MessageCircle, ScanSearch, Sparkles, Target } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-paper text-ink font-body">
-      <header className="p-6 border-b border-ink/5">
-        <nav className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-ink/70 hover:text-ink transition-colors font-medium">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
-          <div className="font-display font-bold text-xl tracking-tight flex items-center gap-2">
-            <BrainCircuit className="w-6 h-6 text-mint" />
-            SmartWallet AI
+    <main className="min-h-screen overflow-hidden bg-paper text-ink font-body">
+      <section className="relative border-b border-ink/10 px-6 pb-20 pt-32 md:px-12 md:pb-28 md:pt-40">
+        <div className="absolute -right-24 top-0 h-80 w-80 rounded-full border-[48px] border-mint/10" />
+        <div className="relative mx-auto grid max-w-6xl gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+          <div className="max-w-3xl">
+            <div className="mb-7 inline-flex items-center gap-2 border border-mint/30 bg-mint/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-deepmint"><Sparkles className="h-4 w-4" /> Financial awareness, rethought</div>
+            <h1 className="max-w-3xl font-display text-5xl font-bold leading-[0.98] tracking-tight md:text-7xl">Your money should <span className="text-mint">explain itself.</span></h1>
+            <p className="mt-8 max-w-xl text-lg leading-8 text-ink/65 md:text-xl">Spendly turns the blur of everyday payments into a calm, intelligent picture of your financial life. Less logging. More knowing.</p>
           </div>
-        </nav>
-      </header>
-
-      <main className="max-w-4xl mx-auto p-6 py-20 space-y-12">
-        <div className="space-y-6 text-center max-w-2xl mx-auto">
-          <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight">The invisible drain of digital payments</h1>
-          <p className="text-lg text-ink/70 leading-relaxed">
-            In the era of UPI and frictionless digital payments, it's never been easier to spend money. But this frictionlessness has a cost: we lose awareness of where our money goes. Small, frequent transactions bleed budgets dry before we even realize it.
-          </p>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-ink/5 p-8 shadow-sm">
-          <h2 className="font-display text-2xl font-bold mb-8 text-center">How SmartWallet AI Works</h2>
-          
-          <div className="flex flex-col md:flex-row items-center gap-4 text-center justify-between">
-            <div className="flex-1">
-              <div className="font-mono text-sm bg-ink/5 py-2 px-4 rounded mb-4">₹180 Coffee</div>
-              <div className="text-sm font-semibold uppercase text-ink/50 mb-1">Raw Transaction</div>
-            </div>
-            
-            <div className="hidden md:block w-8 h-px bg-ink/20" />
-            
-            <div className="flex-1">
-              <div className="font-bold text-lg text-ink mb-4">14 similar transactions</div>
-              <div className="text-sm font-semibold uppercase text-ink/50 mb-1">Pattern Identified</div>
-            </div>
-
-            <div className="hidden md:block w-8 h-px bg-ink/20" />
-
-            <div className="flex-1">
-              <div className="font-bold text-lg text-coral mb-4">27% above baseline</div>
-              <div className="text-sm font-semibold uppercase text-ink/50 mb-1">Context Applied</div>
-            </div>
-
-            <div className="hidden md:block w-8 h-px bg-ink/20" />
-
-            <div className="flex-1">
-              <div className="font-bold text-lg text-mint mb-4">Create ₹450 weekly cap</div>
-              <div className="text-sm font-semibold uppercase text-ink/50 mb-1">Actionable Insight</div>
-            </div>
+          <div className="relative border-l-2 border-mint pl-7 lg:mb-2">
+            <p className="font-display text-2xl font-bold leading-tight md:text-3xl">We are building the layer of context between a transaction and a better decision.</p>
+            <p className="mt-5 text-sm leading-6 text-ink/60">Because a list of expenses tells you what happened. The right insight tells you what to do next.</p>
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28">
+        <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr]"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-coral">The problem we care about</p><h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">Small spends are never really small.</h2></div><div className="grid gap-8 text-base leading-7 text-ink/65 md:grid-cols-2 md:gap-x-12"><p>Digital payments removed friction from spending. They also removed the pause where awareness used to live. A coffee, a delivery fee, one more subscription: each feels harmless in isolation.</p><p>Spendly gives that pause back without asking you to become an accountant. It spots patterns across the noise, adds context, and makes the next sensible action obvious.</p></div></div>
+        <div className="mt-20 grid border-y border-ink/15 md:grid-cols-3">{[['01', 'See clearly', 'One honest view of cash, cards, bills, and goals.'], ['02', 'Understand patterns', 'AI finds the habits hidden in your transaction history.'], ['03', 'Act with confidence', 'Timely nudges help you change course before the month does.']].map(([number, title, description]) => <div key={number} className="border-b border-ink/15 py-8 last:border-0 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-0 md:last:pr-0"><span className="font-mono text-sm text-mint">{number}</span><h3 className="mt-5 font-display text-2xl font-bold">{title}</h3><p className="mt-3 text-sm leading-6 text-ink/60">{description}</p></div>)}</div>
+      </section>
+
+      <section className="bg-ink px-6 py-20 text-paper md:px-12 md:py-24"><div className="mx-auto max-w-6xl"><div className="max-w-2xl"><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-amber">Inside the intelligence</p><h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">From raw payment to useful insight.</h2></div><div className="mt-14 grid gap-px overflow-hidden border border-paper/15 bg-paper/15 md:grid-cols-4">{[[ScanSearch, 'Capture', 'Every payment enters one clear stream.'], [BrainCircuit, 'Connect', 'Similar activity becomes a meaningful pattern.'], [Gauge, 'Contextualize', 'Your history sets a personal baseline.'], [Target, 'Guide', 'A specific next step replaces vague advice.']].map(([Icon, title, description]) => <div key={title as string} className="bg-ink p-7"><Icon className="h-7 w-7 text-mint" /><h3 className="mt-12 font-display text-xl font-bold">{title as string}</h3><p className="mt-3 text-sm leading-6 text-paper/60">{description as string}</p></div>)}</div></div></section>
+
+      <section className="mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28"><div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-mint">Our principles</p><h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">Useful beats impressive.</h2></div><div className="grid gap-6 sm:grid-cols-2">{[[Eye, 'Clarity first', 'No jargon, no judgment, no mystery behind a recommendation.'], [LockKeyhole, 'Your data is yours', 'Privacy is a product decision, not a footnote.']].map(([Icon, title, description]) => <div key={title as string} className="border-t-2 border-ink pt-6"><Icon className="h-6 w-6 text-coral" /><h3 className="mt-5 font-display text-xl font-bold">{title as string}</h3><p className="mt-3 text-sm leading-6 text-ink/60">{description as string}</p></div>)}</div></div></section>
+
+      <section className="bg-mint/10 px-6 py-16 md:px-12 md:py-20"><div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr]"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-coral">Contact and connect</p><h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">Let&apos;s make money clearer, together.</h2><p className="mt-5 max-w-md leading-7 text-ink/65">Have a question, an idea, or a perspective worth sharing? Our door is open.</p></div><div className="grid gap-6 sm:grid-cols-2"><a href="mailto:hello@spendly.ai" className="group border border-ink/15 bg-paper p-7 transition-transform hover:-translate-y-1"><Mail className="h-7 w-7 text-mint" /><p className="mt-12 text-xs font-bold uppercase tracking-[0.16em] text-ink/50">Contact us</p><p className="mt-3 font-display text-xl font-bold group-hover:text-mint">hello@spendly.ai</p><p className="mt-2 text-sm text-ink/60">Questions, feedback, partnerships</p></a><div className="border border-ink/15 bg-paper p-7"><p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/50">Connect with us</p><p className="mt-3 font-display text-xl font-bold">Follow the build</p><div className="mt-8 flex gap-3"><a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="Spendly on LinkedIn" className="inline-flex h-11 w-11 items-center justify-center border border-ink/15 text-ink transition-colors hover:border-mint hover:text-mint"><MessageCircle className="h-5 w-5" /></a><a href="https://github.com" target="_blank" rel="noreferrer" aria-label="Spendly on GitHub" className="inline-flex h-11 w-11 items-center justify-center border border-ink/15 text-ink transition-colors hover:border-mint hover:text-mint"><Globe className="h-5 w-5" /></a><Link href="/auth" className="inline-flex items-center gap-2 px-3 text-sm font-bold text-deepmint hover:text-ink">Join Spendly <ArrowRight className="h-4 w-4" /></Link></div></div></div></div></section>
+
+      <section className="border-t border-ink/10 px-6 py-16 md:px-12 md:py-20"><div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 md:flex-row md:items-center"><div><h2 className="font-display text-3xl font-bold md:text-4xl">Make your next money decision clearer.</h2><p className="mt-3 text-ink/60">Start with the complete picture, then let Spendly do the noticing.</p></div><Link href="/auth" className="inline-flex shrink-0 items-center gap-3 bg-mint px-6 py-4 font-bold text-ink transition-transform hover:-translate-y-1">Enter Spendly <ArrowRight className="h-5 w-5" /></Link></div></section>
+    </main>
   );
 }
