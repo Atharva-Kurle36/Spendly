@@ -151,58 +151,84 @@ export default function WalletScrollReveal({ className }: { className?: string }
             {/* STICKY VISUAL CONTAINER (Right Side) */}
             <div className="w-full md:w-[50%] lg:w-[40%] order-1 md:order-2 sticky top-24 md:top-[40vh] h-[250px] md:h-auto z-10 flex justify-center items-start pointer-events-none perspective-[1500px]">
                 <div
-                    className="relative w-[280px] h-[190px] transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] drop-shadow-2xl"
+                    className="relative w-[280px] h-[190px] transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] drop-shadow-[0_40px_40px_rgba(0,0,0,0.5)]"
                     style={{
                         transformStyle: "preserve-3d",
                         transform: isOpen ? "rotateX(25deg) rotateY(-20deg) rotateZ(5deg)" : "rotateX(15deg) rotateY(-5deg) rotateZ(2deg)"
                     }}
                 >
-                    {/* Wallet back panel */}
+                    {/* Wallet back panel (Matte Black Leather styling) */}
                     <div
-                        className="absolute inset-0 rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-                        style={{ backgroundColor: "var(--wallet-body)", transform: "translateZ(-2px)" }}
+                        className="absolute inset-0 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-[#ffffff10]"
+                        style={{
+                            background: "linear-gradient(135deg, #1c1c1c 0%, #0a0a0a 100%)",
+                            boxShadow: "inset 0 0 0 1px #000, inset 0 0 0 3px #1a1a1a, 0 30px 60px rgba(0,0,0,0.6)",
+                            transform: "translateZ(-2px)"
+                        }}
                     />
 
                     {/* Cards stack */}
+
+                    {/* Cash Stack (Warm tone, paper texture simulation) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-white/20",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15]",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCash ? "top-[-45px] opacity-100 rotate-[-4deg]" : "top-2 opacity-0 rotate-0"
+                            showCash ? "top-[-50px] opacity-100 rotate-[-4deg]" : "top-2 opacity-0 rotate-0"
                         )}
-                        style={{ backgroundColor: "var(--card-cash)", transform: "translateZ(10px)" }}
-                    />
+                        style={{
+                            background: "linear-gradient(145deg, #d4c5a0 0%, #a89467 100%)",
+                            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)",
+                            transform: "translateZ(10px)"
+                        }}
+                    >
+                        {/* Fake cash banding/texture */}
+                        <div className="absolute inset-x-3 top-3 bottom-3 border border-[#ffffff30] rounded opacity-50" />
+                    </div>
+
+                    {/* Debit Card (Cool Dark tone with brushed metal sheen) */}
                     <div
                         className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-white/20",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-100 border border-[#ffffff1a]",
                             "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showDebit ? "top-[-15px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
+                            showDebit ? "top-[-20px] opacity-100 rotate-[2deg]" : "top-6 opacity-0 rotate-0"
                         )}
-                        style={{ backgroundColor: "var(--card-debit)", transform: "translateZ(20px)" }}
-                    />
-                    <div
-                        className={cn(
-                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-white/20",
-                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
-                            showCredit ? "top-[15px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
-                        )}
-                        style={{ backgroundColor: "var(--card-credit)", transform: "translateZ(30px)" }}
+                        style={{
+                            background: "linear-gradient(120deg, #1e293b 0%, #0f172a 100%)",
+                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.15)",
+                            transform: "translateZ(20px)"
+                        }}
                     />
 
-                    {/* Wallet front flap */}
+                    {/* Credit Card (Deep Warm Dark tone with subtle sheen) */}
                     <div
                         className={cn(
-                            "absolute inset-0 rounded-2xl shadow-2xl origin-bottom transition-all duration-[900ms] ease-[cubic-bezier(0.23,1,0.32,1)] border border-white/10 flex items-end justify-center pb-2",
+                            "absolute left-4 right-4 h-[110px] rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.7)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] delay-200 border border-[#ffffff20]",
+                            "motion-reduce:transition-opacity motion-reduce:transform-none motion-reduce:!rotate-0",
+                            showCredit ? "top-[10px] opacity-100 rotate-[-2deg]" : "top-10 opacity-0 rotate-0"
+                        )}
+                        style={{
+                            background: "linear-gradient(135deg, #4a1f28 0%, #240c12 100%)",
+                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.15)",
+                            transform: "translateZ(30px)"
+                        }}
+                    />
+
+                    {/* Wallet front flap (Matte Black Leather with Stitching effect) */}
+                    <div
+                        className={cn(
+                            "absolute inset-0 rounded-2xl shadow-2xl origin-bottom transition-all duration-[900ms] ease-[cubic-bezier(0.23,1,0.32,1)] border border-[#ffffff15] flex items-end justify-center pb-2",
                             "motion-reduce:transition-opacity motion-reduce:transform-none"
                         )}
                         style={{
-                            backgroundColor: "var(--wallet-flap)",
+                            background: "linear-gradient(180deg, #242424 0%, #111111 100%)",
+                            boxShadow: "inset 0 0 0 1px #000, inset 0 0 0 3px #1f1f1f",
                             transform: isOpen ? "translateZ(40px) rotateX(-125deg)" : "translateZ(40px) rotateX(0deg)",
                             opacity: isOpen ? 0.95 : 1
                         }}
                     >
-                        {/* Clasp */}
-                        <div className="w-12 h-2.5 rounded-full bg-white/20 border border-white/30 shadow-inner" />
+                        {/* Clasp (Metallic snap button) */}
+                        <div className="w-16 h-3 rounded-full bg-gradient-to-b from-[#666] to-[#222] border border-[#000] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_5px_rgba(0,0,0,0.6)]" />
                     </div>
                 </div>
             </div>
