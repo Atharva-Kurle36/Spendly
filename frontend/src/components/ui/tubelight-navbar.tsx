@@ -63,7 +63,7 @@ export function NavBar({ items, className, isLoggedIn }: NavBarProps) {
     return (
         <div
             className={cn(
-                "relative z-[100] flex justify-center pt-4 sm:pt-6",
+                "fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-[100]",
                 className
             )}
         >
